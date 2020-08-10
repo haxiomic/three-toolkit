@@ -22,11 +22,13 @@ class Animator {
 
 	var t_s = 0.0;
 	final easingAnimations = new haxe.ds.List<EasingAnimation>();
+	final springs = new Array<Spring>();
 
-	public inline function new() {}
+	public function new() {}
 
-	public inline function step(dt_s: Float) {
+	public function step(dt_s: Float) {
 		t_s += dt_s;
+
 		for (e in easingAnimations) {
 			var t = t_s - e.t0;
 			var complete = t >= e.duration_s;
@@ -42,9 +44,13 @@ class Animator {
 				easingAnimations.remove(e);
 			}
 		}
+
+		for (spring in springs) {
+			spring.step(dt_s);
+		}
 	}
 
-	public inline function ease(
+	public function ease(
 		easingFn: EasingFunction,
 		object: Dynamic,
 		targets: DynamicAccess<Float>,
@@ -71,6 +77,23 @@ class Animator {
 				});
 			}
 		}
+	}
+
+	public function createSpring(
+		initialValue: Float,
+		target: Float,
+		strength: Float,
+		damping: Float,
+		velocity: Float = 0.0,
+		onUpdate: (value: Float, velocity: Float) -> Void
+	) {
+		var spring = new Spring(initialValue, target, strength, damping, velocity, onUpdate);
+		springs.push(spring);
+		return spring;
+	}
+
+	public function removeSpring(spring: Spring) {
+		springs.remove(spring);
 	}
 
 	// easing
