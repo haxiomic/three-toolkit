@@ -79,15 +79,7 @@ class Animator {
 		}
 	}
 
-	public function createSpring(
-		initialValue: Float,
-		target: Float,
-		strength: Float,
-		damping: Float,
-		velocity: Float = 0.0,
-		onUpdate: (value: Float, velocity: Float) -> Void
-	) {
-		var spring = new Spring(initialValue, target, strength, damping, velocity, onUpdate);
+	public function addSpring(spring: Spring) {
 		springs.push(spring);
 		return spring;
 	}
