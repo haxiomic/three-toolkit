@@ -42,7 +42,7 @@ class Spring {
 		if ((X0 == 0 && V0 == 0) || t == 0) return; // nothing will change
 
 		var k = this.strength;
-		var b = this.damping; // β
+		var b = this.damping; // β in wolfram reference
 
 		var critical = k * 4 - b * b;
 
@@ -70,7 +70,7 @@ class Spring {
 			var u = 0.5 * sqrt(-critical);
 			var p = -0.5 * b + u;
 			var n = -0.5 * b - u;
-			var B = -(n*X0 - V0)/2*u;
+			var B = -(n*X0 - V0)/(2*u);
 			var A = X0 - B;
 
 			var ep = exp(p * t);
