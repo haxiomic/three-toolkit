@@ -8,7 +8,7 @@ import three.Object3D;
 class Object3DTools {
 
 	/**
-		Call callback on the input object as well as all descendants
+		Recursive iteration of child objects
 	**/
 	static public function iterate(obj: Object3D, cb: Object3D -> Void) {
 		cb(obj);
@@ -18,6 +18,9 @@ class Object3DTools {
 		}
 	}
 
+	/**
+		Recursive iteration of child meshes
+	**/
 	static public function iterateMeshes(obj: Object3D, cb: Mesh<Geometry, Material> -> Void) {
 		if (Std.is(obj, Mesh)) cb(cast obj);
 		for (child in obj.children) {
