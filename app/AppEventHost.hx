@@ -168,11 +168,8 @@ class AppEventHost {
 				switch (touchEvent.type) {
 					case 'touchstart':
 						touchInfo.activeCount++;
-						break;
-					case 'touchend':
-					case 'touchcancel':
+					case 'touchcancel', 'touchend':
 						touchInfo.activeCount--;
-						break;
 				}
 
 				// convert altitude-azimuth to tilt xy
