@@ -109,4 +109,9 @@ class Spring {
 		if (onUpdate != null) onUpdate(value, velocity);
 	}
 
+	public function forceCompletion() {
+		value = target;
+		velocity = 0;
+	}
+
 }

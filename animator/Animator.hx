@@ -20,9 +20,9 @@ private typedef EasingAnimation = {
 @:nullSafety
 class Animator {
 
+	public final easingAnimations = new haxe.ds.List<EasingAnimation>();
+	public final springs = new Array<Spring>();
 	var t_s = 0.0;
-	final easingAnimations = new haxe.ds.List<EasingAnimation>();
-	final springs = new Array<Spring>();
 
 	public function new() {}
 
