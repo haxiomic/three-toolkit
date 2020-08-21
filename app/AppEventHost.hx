@@ -103,6 +103,7 @@ class AppEventHost {
 				tiltX: 0,
 				tiltY: 0,
 				twist: 0,
+				nativeEvent: mouseEvent,
 			})) {
 				mouseEvent.preventDefault();
 			}
@@ -196,16 +197,17 @@ class AppEventHost {
 					tiltX: Math.isFinite(tiltX) ? tiltX : 0,
 					tiltY: Math.isFinite(tiltY) ? tiltY : 0,
 					twist: touch.rotationAngle,
+					nativeEvent: touchEvent,
 				})) {
 					touchEvent.preventDefault();
 				}
 			}
 		}
 
-		var onPointerDown = (e) -> appInstance.onPointerDown(e);
-		var onPointerMove = (e) -> appInstance.onPointerMove(e);
-		var onPointerUp = (e) -> appInstance.onPointerUp(e);
-		var onPointerCancel = (e) -> appInstance.onPointerCancel(e);
+		var onPointerDown = (e) -> { Reflect.setField(e, 'nativeEvent', e); appInstance.onPointerDown(e); };
+		var onPointerMove = (e) -> { Reflect.setField(e, 'nativeEvent', e); appInstance.onPointerMove(e); };
+		var onPointerUp = (e) -> { Reflect.setField(e, 'nativeEvent', e); appInstance.onPointerUp(e); };
+		var onPointerCancel = (e) -> { Reflect.setField(e, 'nativeEvent', e); appInstance.onPointerCancel(e); };
 
 		// use PointerEvent API if supported
 		if (js.Syntax.field(window, 'PointerEvent')) {
@@ -265,6 +267,8 @@ class AppEventHost {
 				ctrlKey: e.ctrlKey,
 				metaKey: e.metaKey,
 				shiftKey: e.shiftKey,
+
+				nativeEvent: e,
 			})) {
 				e.preventDefault();
 			}

@@ -42,4 +42,9 @@ class WheelEvent {
 	final metaKey: Bool;
 	final shiftKey: Bool;
 
+	/**
+		Reference to original native event object – type varies between platform
+	**/
+	final nativeEvent: #if js js.html.WheelEvent #else Dynamic #end;
+
 }
