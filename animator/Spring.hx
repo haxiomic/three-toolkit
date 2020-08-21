@@ -2,6 +2,10 @@ package animator;
 
 import Math.*;
 
+/**
+	Visualization of parameters
+	https://www.desmos.com/calculator/c2iug0kerh
+**/
 class Spring {
 
 	public var value: Float;

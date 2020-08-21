@@ -14,7 +14,7 @@ class Scalar {
 		return Math.abs(x % 1);
 	}
 
-	static public inline function lerp(a: Float, b: Float, t: Float) {
+	static public inline function mix(a: Float, b: Float, t: Float) {
 		return a * (1.0  - t) + b * t;
 	}
 
