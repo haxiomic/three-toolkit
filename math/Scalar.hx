@@ -1,5 +1,7 @@
 package math;
 
+import Math.*;
+
 class Scalar {
 	
 	static public inline function mod(x: Float, m: Float) {
@@ -11,7 +13,7 @@ class Scalar {
 	}
 
 	static public inline function fract(x: Float) {
-		return Math.abs(x % 1);
+		return abs(x % 1);
 	}
 
 	static public inline function mix(a: Float, b: Float, t: Float) {
@@ -20,6 +22,20 @@ class Scalar {
 
 	static public inline function clamp(x: Float, min: Float, max: Float) {
 		return x < min ? min : (x > max ? max : x);
+	}
+
+	static public inline function randomGaussian() {
+		return sqrt(-2 * log(random())) * cos(2 * PI * random());
+	}
+
+	static public inline function randomGaussian2D() {
+		// https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+		var u1 = random();
+		var u2 = random();
+		return {
+			x: sqrt(-2 * log(u1)) * cos(2 * PI * u2),
+			y: sqrt(-2 * log(u2)) * cos(2 * PI * u1)
+		}
 	}
 
 	static public inline function smoothstep(edge0: Float, edge1: Float, x: Float) {
