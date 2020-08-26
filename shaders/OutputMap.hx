@@ -9,6 +9,7 @@ enum abstract ToneMapping(String) to String {
 	var Reinhard = 'ReinhardToneMapping';
 	var OptimizedCineon = 'OptimizedCineonToneMapping';
 	var Linear = 'LinearToneMapping';
+	var Abs = 'abs';
 }
 
 enum abstract Encoding(String) to String {
