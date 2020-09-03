@@ -3,6 +3,8 @@ package math;
 import Math.*;
 
 class Scalar {
+
+	// GLSL style functions
 	
 	static public inline function mod(x: Float, m: Float) {
 		return ( (x % m) + m ) % m;
@@ -24,6 +26,19 @@ class Scalar {
 		return x < min ? min : (x > max ? max : x);
 	}
 
+	static public inline function smoothstep(edge0: Float, edge1: Float, x: Float) {
+		var t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+		return t * t * (3.0 - 2.0 * t);
+	}
+
+	static public inline function int(v: Float): Int {
+		return Std.int(v);
+	}
+
+	static public inline function float(v: Int): Float {
+		return v;
+	}
+
 	static public inline function randomGaussian() {
 		return sqrt(-2 * log(random())) * cos(2 * PI * random());
 	}
@@ -36,11 +51,6 @@ class Scalar {
 			x: sqrt(-2 * log(u1)) * cos(2 * PI * u2),
 			y: sqrt(-2 * log(u2)) * cos(2 * PI * u1)
 		}
-	}
-
-	static public inline function smoothstep(edge0: Float, edge1: Float, x: Float) {
-		var t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
-		return t * t * (3.0 - 2.0 * t);
 	}
 
 }
