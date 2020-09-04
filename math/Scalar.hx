@@ -26,6 +26,10 @@ class Scalar {
 		return x < min ? min : (x > max ? max : x);
 	}
 
+	static public inline function step(edge: Float, x: Float) {
+		return x > edge ? 1.0 : 0.0;
+	}
+
 	static public inline function smoothstep(edge0: Float, edge1: Float, x: Float) {
 		var t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
 		return t * t * (3.0 - 2.0 * t);
