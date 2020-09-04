@@ -27,7 +27,7 @@ class Scalar {
 	}
 
 	static public inline function step(edge: Float, x: Float) {
-		return x > edge ? 1.0 : 0.0;
+		return x < edge ? 0.0 : 1.0;
 	}
 
 	static public inline function smoothstep(edge0: Float, edge1: Float, x: Float) {
