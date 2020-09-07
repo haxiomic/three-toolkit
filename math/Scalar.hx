@@ -35,6 +35,10 @@ class Scalar {
 		return t * t * (3.0 - 2.0 * t);
 	}
 
+	static public inline function linstep(edge0: Float, edge1: Float, x: Float) {
+		return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+	}
+
 	static public inline function int(v: Float): Int {
 		return Std.int(v);
 	}
