@@ -1,8 +1,8 @@
 package app;
 
+import js.html.Element;
 import app.event.PointerEvent;
 import js.Browser.*;
-import js.html.CanvasElement;
 import js.html.KeyboardEvent;
 import js.html.MouseEvent;
 import js.html.TouchEvent;
@@ -11,30 +11,30 @@ import js.html.WheelEvent;
 class AppEventHost {
 	
 	public final appInstance: AppEventInterface;
-	public final canvas: CanvasElement;
+	public final el: Element;
 
-	public function new(appInstance: AppEventInterface, canvas: CanvasElement) {
-		// automatically create a canvas element with reasonable defaults
+	public function new(appInstance: AppEventInterface, el: Element) {
+		// automatically create a el element with reasonable defaults
 		this.appInstance = appInstance;
-		this.canvas = canvas;
+		this.el = el;
 
-		if (canvas.tabIndex == null) {
-			// make the canvas focusable
-			// this enables us to determine if our canvas has focus when receiving key events
-			canvas.tabIndex = 1;
+		if (el.tabIndex == null) {
+			// make the el focusable
+			// this enables us to determine if our el has focus when receiving key events
+			el.tabIndex = 1;
 		}
 
 		// disable default touch actions, this helps disable view dragging on touch devices
-		canvas.style.touchAction = 'none';
-		canvas.setAttribute('touch-action', 'none');
+		el.style.touchAction = 'none';
+		el.setAttribute('touch-action', 'none');
 		// prevent native touch-scroll
 		function cancelEvent(e) {
 			e.preventDefault();
 			e.stopPropagation();
 		}
-		canvas.addEventListener('gesturestart', cancelEvent, false);
-		canvas.addEventListener('gesturechange', cancelEvent, false);
-		// canvas.addEventListener('scroll', cancelEvent); need to experiment
+		el.addEventListener('gesturestart', cancelEvent, false);
+		el.addEventListener('gesturechange', cancelEvent, false);
+		// el.addEventListener('scroll', cancelEvent); need to experiment
 
 		// attach interaction event listeners
 		addPointerEventListeners();
@@ -47,13 +47,13 @@ class AppEventHost {
 		onVisibilityChange();
 	}
 
-	var canvasClientWidth: Null<Int> = null;
-	var canvasClientHeight: Null<Int> = null;
+	var elClientWidth: Null<Int> = null;
+	var elClientHeight: Null<Int> = null;
 	inline function onResize() {
-		if (canvasClientWidth != canvas.clientWidth || canvasClientHeight != canvas.clientHeight) {
-			canvasClientWidth = canvas.clientWidth;
-			canvasClientHeight = canvas.clientHeight;
-			appInstance.onResize(canvas.clientWidth, canvas.clientHeight);
+		if (elClientWidth != el.clientWidth || elClientHeight != el.clientHeight) {
+			elClientWidth = el.clientWidth;
+			elClientHeight = el.clientHeight;
+			appInstance.onResize(el.clientWidth, el.clientHeight);
 		}
 	}
 
@@ -211,18 +211,18 @@ class AppEventHost {
 
 		// use PointerEvent API if supported
 		if (js.Syntax.field(window, 'PointerEvent')) {
-			canvas.addEventListener('pointerdown', onPointerDown);
+			el.addEventListener('pointerdown', onPointerDown);
 			window.addEventListener('pointermove', onPointerMove);
 			window.addEventListener('pointerup', onPointerUp);
 			window.addEventListener('pointercancel', onPointerCancel);
 		} else {
-			canvas.addEventListener('mousedown', (e) -> executePointerMethodFromMouseEvent(e, onPointerDown));
+			el.addEventListener('mousedown', (e) -> executePointerMethodFromMouseEvent(e, onPointerDown));
 			window.addEventListener('mousemove', (e) -> executePointerMethodFromMouseEvent(e, onPointerMove));
 			window.addEventListener('webkitmouseforcechanged', (e) -> executePointerMethodFromMouseEvent(e, onPointerMove));
 			window.addEventListener('mouseforcechanged', (e) -> executePointerMethodFromMouseEvent(e, onPointerMove));
 			window.addEventListener('mouseup', (e) -> executePointerMethodFromMouseEvent(e, onPointerUp));
 			var useCapture = true;
-			canvas.addEventListener('touchstart', (e) -> executePointerMethodFromTouchEvent(e, onPointerDown), { capture: useCapture,  }); // passive: false
+			el.addEventListener('touchstart', (e) -> executePointerMethodFromTouchEvent(e, onPointerDown), { capture: useCapture,  }); // passive: false
 			window.addEventListener('touchmove', (e) -> executePointerMethodFromTouchEvent(e, onPointerMove), { capture: useCapture,  }); // passive: false
 			window.addEventListener('touchforcechange', (e) -> executePointerMethodFromTouchEvent(e, onPointerMove), { capture: useCapture,  }); // passive: true
 			window.addEventListener('touchend', (e) -> executePointerMethodFromTouchEvent(e, onPointerUp), {capture: useCapture, }); // passive: true
@@ -231,7 +231,7 @@ class AppEventHost {
 	}
 
 	function addWheelEventListeners() {
-		canvas.addEventListener('wheel', (e: js.html.WheelEvent) -> {
+		el.addEventListener('wheel', (e: js.html.WheelEvent) -> {
 			// we normalize for delta modes, so we always scroll in px
 			// chrome always uses pixels but firefox can sometime uses lines and pages
 			// see https://stackoverflow.com/questions/20110224/what-is-the-height-of-a-line-in-a-wheel-event-deltamode-dom-delta-line
@@ -278,13 +278,13 @@ class AppEventHost {
 	function addKeyboardEventListeners() {
 		// keyboard event
 		window.addEventListener('keydown', (e: KeyboardEvent) -> {
-			var hasFocus = e.target == canvas;
+			var hasFocus = e.target == el;
 			if (appInstance.onKeyDown(cast e, hasFocus)) {
 				e.preventDefault();
 			}
 		});
 		window.addEventListener('keyup', (e) -> {
-			var hasFocus = e.target == canvas;
+			var hasFocus = e.target == el;
 			if (appInstance.onKeyUp(cast e, hasFocus)) {
 				e.preventDefault();
 			}
@@ -297,8 +297,8 @@ class AppEventHost {
 	}
 
 	function addResizeEventListeners() {
-		// we assume the canvas may resize if the window resizes
-		// however, you can call onResize() if the canvas resizes without the window resizing
+		// we assume the el may resize if the window resizes
+		// however, you can call onResize() if the el resizes without the window resizing
 		window.addEventListener('resize', () -> onResize(), {
 			capture: false,
 		});
