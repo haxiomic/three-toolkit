@@ -39,12 +39,16 @@ class Scalar {
 		return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
 	}
 
-	static public inline function int(v: Float): Int {
-		return Std.int(v);
+	static public inline function int(?f: Float, ?b: Bool): Int {
+		return if (f != null) Std.int(f);
+		else if (b != null) b ? 1 : 0;
+		else 0;
 	}
 
-	static public inline function float(v: Int): Float {
-		return v;
+	static public inline function float(?i: Int, ?b: Bool): Float {
+		return if (i != null) i;
+		else if (b != null) b ? 1.0 : 0.0;
+		else 0.0;
 	}
 
 	static public inline function randomGaussian() {
