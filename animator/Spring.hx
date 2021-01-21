@@ -19,8 +19,8 @@ class Spring {
 	public function new(
 		initialValue: Float,
 		target: Float,
-		strength: Float,
-		damping: Float,
+		strength: Float = 80,
+		damping: Float = 18,
 		velocity: Float = 0.0,
 		?onUpdate: (value: Float, velocity: Float) -> Void
 	) {
