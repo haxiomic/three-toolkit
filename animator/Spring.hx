@@ -4,7 +4,7 @@ import Math.*;
 
 /**
 	Visualization of parameters
-	https://www.desmos.com/calculator/c2iug0kerh
+	https://www.desmos.com/calculator/fayu8nu1md
 **/
 class Spring {
 
@@ -116,6 +116,7 @@ class Spring {
 	public function forceCompletion() {
 		value = target;
 		velocity = 0;
+		if (onUpdate != null) onUpdate(value, velocity);
 	}
 
 }
