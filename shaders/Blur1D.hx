@@ -27,7 +27,7 @@ class Blur1D extends RawShaderMaterial {
 
 	static final instances = new Map<String, Blur1D>();
 
-	public final uTexture = new Uniform<Texture>(null);
+	public final uTexture = new Uniform(null);
 	public final uTexelSize = new Uniform(new Vector2(1,1));
 	public final kernel: Float;
 	public final directionX: Float;
