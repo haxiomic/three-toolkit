@@ -78,7 +78,7 @@ function clearTargetCache() {
 	_renderTargets.clear();
 }
 
-private var fragmentRenderer(get, null): FragmentRenderer = null;
+var fragmentRenderer(get, null): FragmentRenderer = null;
 private var _fragmentRenderer: Null<FragmentRenderer> = null;
 private inline function get_fragmentRenderer() {
 	if (_fragmentRenderer == null) {

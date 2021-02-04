@@ -40,7 +40,13 @@ class FluidSimulation {
 	public final colorTexture: DualRenderTarget;
 	public final velocityTexture: DualRenderTarget;
 	public final pressureTexture: DualRenderTarget;
-	public final divergenceTexture: WebGLRenderTarget;
+	public var divergenceTexture: WebGLRenderTarget;
+
+	public var width(default, null): Int;
+	public var height(default, null): Int;
+	final simulationTextureScale: Float;
+	var simulationWidth: Int;
+	var simulationHeight: Int;
 
 	final fragmentRenderer: FragmentRenderer;
 
@@ -49,6 +55,8 @@ class FluidSimulation {
 	final divergenceShader: Divergence;
 	final pressureSolveShader: PressureSolve;
 	final pressureGradientSubtractShader: PressureGradientSubtract;
+
+	final textureOptionsNearest: WebGLRenderTargetOptions;
 
 	public function new(
 		renderer: WebGLRenderer,
@@ -59,9 +67,12 @@ class FluidSimulation {
 		simulationTextureScale = 0.25
 	) {
 		fragmentRenderer = new FragmentRenderer(renderer);
+		this.width = width;
+		this.height = height;
+		this.simulationTextureScale = simulationTextureScale;
 
-		var simulationWidth = Std.int(width * simulationTextureScale);
-		var simulationHeight = Std.int(height * simulationTextureScale);
+		simulationWidth = Std.int(width * simulationTextureScale);
+		simulationHeight = Std.int(height * simulationTextureScale);
 
 		var textureOptions: WebGLRenderTargetOptions = {
 			encoding: LinearEncoding,
@@ -77,13 +88,13 @@ class FluidSimulation {
 			wrapS: wrappedBoundary ? RepeatWrapping : ClampToEdgeWrapping,
 		}
 
-		var textureOptionsNearest = StructureTools.extend(textureOptions, {
+		textureOptionsNearest = StructureTools.extend(textureOptions, {
 			minFilter: TextureFilter.NearestFilter,
 			magFilter: TextureFilter.NearestFilter,
 		});
 
 		// use gamma decode when displaying the color texture (advection is still handled in linear-space)
-		colorTexture = new DualRenderTarget(width, height, extend(textureOptions, {encoding: TextureEncoding.GammaEncoding}));
+		colorTexture = new DualRenderTarget(width, height, StructureTools.extend(textureOptions, {encoding: TextureEncoding.GammaEncoding}));
 		velocityTexture = new DualRenderTarget(simulationWidth, simulationHeight, textureOptions);
 		pressureTexture = new DualRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
 		divergenceTexture = new WebGLRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
@@ -156,6 +167,21 @@ class FluidSimulation {
 		advectShader.target.value = colorTexture.getTexture();
 		fragmentRenderer.render(colorTexture.getRenderTarget(), advectShader);
 		colorTexture.swap();
+	}
+
+	public function resize(newWidth: Int, newHeight: Int) {
+		this.width = newWidth;
+		this.height = newHeight;
+		this.simulationWidth = Std.int(newWidth * simulationTextureScale);
+		this.simulationHeight = Std.int(newHeight * simulationTextureScale);
+
+		colorTexture.resize(width, height);
+		velocityTexture.resize(simulationWidth, simulationHeight);
+		pressureTexture.resize(simulationWidth, simulationHeight);
+
+		divergenceTexture.dispose();
+		divergenceTexture = new WebGLRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
+		sharedUniforms.divergence.value = divergenceTexture.texture;
 	}
 
 	static public final precision = 'mediump';
