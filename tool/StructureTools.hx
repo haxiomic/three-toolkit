@@ -41,7 +41,7 @@ class StructureTools {
 		}
 	}
 
-	static function extendAny<T>(base: T, extendWidth: Any): T {
+	static public function extendAny<T>(base: T, extendWidth: Any): T {
 		var extended = {};
 		if (base != null) for (field in Reflect.fields(base)) {
 			Reflect.setField(extended, field, Reflect.field(base, field));
