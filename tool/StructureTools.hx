@@ -6,6 +6,9 @@ import haxe.macro.Context;
 class StructureTools {
 
 	static public macro function extend(a, b) {
+		return macro @:privateAccess tool.StructureTools.extendAny($a, $b);
+		/*
+		todo: include reflection
 		var aType = Context.followWithAbstracts(Context.typeof(a));
 		var bType = Context.followWithAbstracts(Context.typeof(b));
 
@@ -39,6 +42,7 @@ class StructureTools {
 				return macro @:privateAccess tool.StructureTools.extendAny($a, $b);
 				// Context.fatalError('Can only extend structures', Context.currentPos());
 		}
+		*/
 	}
 
 	static public function extendAny<T>(base: T, extendWidth: Any): T {
