@@ -41,7 +41,6 @@ function getRenderTarget(
 
 	var target = _renderTargets.get(name);
 	if (target == null) {
-		Console.log('Creating render target <b>"$name"</>');
 		target = new WebGLRenderTarget(width, height, {
 			encoding: LinearEncoding,
 			anisotropy: 0,
