@@ -65,4 +65,11 @@ class Scalar {
 		}
 	}
 
+	static public inline function cubicPulse(c: Float, w: Float, x: Float){
+		x = abs(x - c);
+		if( x>w ) return 0.0;
+		x /= w;
+		return 1.0 - x*x*(3.0-2.0*x);
+	}
+
 }
