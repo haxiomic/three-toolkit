@@ -11,11 +11,10 @@ import tool.StructureTools;
 /**
 	Render a texture that spans screen-space
 **/
-@:nullSafety
 class CompLayer extends ClipSpaceTriangle {
 
 	public final shaderMaterial: ShaderMaterial;
-	public final uTexture: Uniform<Null<Texture>>;
+	public final uTexture: Uniform;
 
 	public function new(options: {
 		depth: Float,

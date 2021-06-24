@@ -6,9 +6,9 @@ import js.lib.Float32Array;
 import three.BufferGeometry;
 import three.Mesh;
 
-class ClipSpaceTriangle extends Mesh<BufferGeometry, Material> {
+class ClipSpaceTriangle<T: Material> extends Mesh<BufferGeometry, T> {
 
-	public function new(material: Null<Material>) {
+	public function new(material: Null<T>) {
 		super(globalGeom, material);
 		this.frustumCulled = false;
 		this.castShadow = false;

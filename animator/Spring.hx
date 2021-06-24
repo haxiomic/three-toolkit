@@ -4,7 +4,7 @@ import Math.*;
 
 /**
 	Visualization of parameters
-	https://www.desmos.com/calculator/c2iug0kerh
+	https://www.desmos.com/calculator/fayu8nu1md
 **/
 class Spring {
 
@@ -19,8 +19,8 @@ class Spring {
 	public function new(
 		initialValue: Float,
 		target: Float,
-		strength: Float,
-		damping: Float,
+		strength: Float = 80,
+		damping: Float = 18,
 		velocity: Float = 0.0,
 		?onUpdate: (value: Float, velocity: Float) -> Void
 	) {
@@ -116,6 +116,7 @@ class Spring {
 	public function forceCompletion() {
 		value = target;
 		velocity = 0;
+		if (onUpdate != null) onUpdate(value, velocity);
 	}
 
 }

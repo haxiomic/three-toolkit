@@ -23,8 +23,19 @@ class Animator {
 	public final easingAnimations = new haxe.ds.List<EasingAnimation>();
 	public final springs = new Array<Spring>();
 	var t_s = 0.0;
+	var postStepCallbacks = new haxe.ds.List<(t_s: Float, dt_s: Float) -> Void>();
 
 	public function new() {}
+
+	public function addPostStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
+		if (!postStepCallbacks.has(callback)) {
+			postStepCallbacks.push(callback);
+		}
+	}
+
+	public function removePostStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
+		postStepCallbacks.remove(callback);
+	}
 
 	public function step(dt_s: Float) {
 		t_s += dt_s;
@@ -47,6 +58,10 @@ class Animator {
 
 		for (spring in springs) {
 			spring.step(dt_s);
+		}
+
+		for (cb in postStepCallbacks) {
+			cb(t_s, dt_s);
 		}
 	}
 
