@@ -1,5 +1,6 @@
 package fluid;
 
+import TopLevel.extend;
 import three.TextureEncoding;
 import rendering.DualRenderTarget;
 import rendering.FragmentRenderer;
@@ -88,7 +89,7 @@ class FluidSimulation {
 			wrapS: wrappedBoundary ? RepeatWrapping : ClampToEdgeWrapping,
 		}
 
-		textureOptionsNearest = StructureTools.extend(textureOptions, {
+		textureOptionsNearest = extend(textureOptions, {
 			minFilter: TextureFilter.NearestFilter,
 			magFilter: TextureFilter.NearestFilter,
 		});

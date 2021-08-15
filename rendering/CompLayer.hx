@@ -1,5 +1,6 @@
 package rendering;
 
+import TopLevel.extend;
 import mesh.ClipSpaceTriangle;
 import three.BlendingDstFactor;
 import three.ShaderMaterial;
@@ -11,10 +12,10 @@ import tool.StructureTools;
 /**
 	Render a texture that spans screen-space
 **/
-class CompLayer extends ClipSpaceTriangle {
+class CompLayer extends ClipSpaceTriangle<ShaderMaterial> {
 
 	public final shaderMaterial: ShaderMaterial;
-	public final uTexture: Uniform;
+	public final uTexture: Uniform<Texture>;
 
 	public function new(options: {
 		depth: Float,
@@ -24,7 +25,7 @@ class CompLayer extends ClipSpaceTriangle {
 		?depthWrite: Bool,
 		?depthTest: Bool,
 	}, ?texture: Texture) {
-		var options = StructureTools.extend({
+		var options = extend({
 			depth: 0.0,
 			alphaBlend: false,
 			premultipliedAlpha: false,

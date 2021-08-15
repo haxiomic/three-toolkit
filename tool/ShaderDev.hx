@@ -1,5 +1,6 @@
 package tool;
 
+import TopLevel.extend;
 import three.OrthographicCamera;
 import three.Scene;
 import three.WebGLRenderer;
@@ -20,7 +21,7 @@ class ShaderDev extends Mesh<BufferGeometry, ShaderMaterial> {
 
 	public function new(parameters: ShaderMaterialParameters) {
 		this.shaderMaterial = new ShaderMaterial(
-			StructureTools.extend(
+			extend(
 				{
 					vertexShader: '
 						varying vec2 vUv;
