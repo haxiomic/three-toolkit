@@ -1,5 +1,7 @@
 package fluid;
 
+import Structure.extendAny;
+import Structure.extend;
 import three.TextureEncoding;
 import rendering.DualRenderTarget;
 import rendering.FragmentRenderer;
@@ -13,7 +15,6 @@ import three.WebGLRenderTarget;
 import three.WebGLRenderTargetOptions;
 import three.WebGLRenderer;
 import tool.CompileTime;
-import tool.StructureTools;
 
 typedef SharedUniforms = {
 	invResolution: Uniform<Vector3>,
@@ -94,7 +95,7 @@ class FluidSimulation {
 		});
 
 		// use gamma decode when displaying the color texture (advection is still handled in linear-space)
-		colorTexture = new DualRenderTarget(width, height, StructureTools.extend(textureOptions, {encoding: TextureEncoding.GammaEncoding}));
+		colorTexture = new DualRenderTarget(width, height, extend(textureOptions, {encoding: TextureEncoding.GammaEncoding}));
 		velocityTexture = new DualRenderTarget(simulationWidth, simulationHeight, textureOptions);
 		pressureTexture = new DualRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
 		divergenceTexture = new WebGLRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
@@ -206,7 +207,7 @@ class Advect extends RawShaderMaterial {
 
 	public function new(sharedUniforms) {
 		super({
-			uniforms: StructureTools.extend(sharedUniforms, {
+			uniforms: extendAny(sharedUniforms, {
 				target: target,
 			}),
 			vertexShader: FluidSimulation.getVertexShader(true, false, true),
