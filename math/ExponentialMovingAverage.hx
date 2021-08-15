@@ -12,7 +12,7 @@ class ExponentialMovingAverage {
 	/**
 		Using an alpha value closer to 1 means rapid exponential decay (fast transition to new values)
 	**/
-	public function new(initialValue, alpha: Float) {
+	public function new(initialValue: Float, alpha: Float) {
 		this.alpha = alpha;
 		this.average = initialValue;
 		addSample(initialValue);
