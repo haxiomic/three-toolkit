@@ -6,3 +6,5 @@ I use three.js r118 via dts2hx (although newer versions will likely work too)
 npm install three@0.118.3 dts2hx
 npx dts2hx three
 ```
+
+Some types rely on [VectorMath](https://github.com/haxiomic/vector-math), install with `haxelib install vector-math`

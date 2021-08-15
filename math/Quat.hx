@@ -1,7 +1,7 @@
 package math;
 
 /**
-	Quaternion implementation extending Vec4
+	Quaternion implementation extending VectorMath Vec4
 **/
 @:forward
 abstract Quat(Vec4) to Vec4 from Vec4 {
