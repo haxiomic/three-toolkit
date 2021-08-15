@@ -18,14 +18,14 @@ class Spring {
 	
 	public function new(
 		initialValue: Float,
-		target: Float,
+		?target: Float,
 		strength: Float = 80,
 		damping: Float = 18,
 		velocity: Float = 0.0,
 		?onUpdate: (value: Float, velocity: Float) -> Void
 	) {
 		this.value = initialValue;
-		this.target = target;
+		this.target = target == null ? initialValue : target;
 		this.strength = strength;
 		this.damping = damping;
 		this.velocity = velocity;
@@ -113,7 +113,10 @@ class Spring {
 		if (onUpdate != null) onUpdate(value, velocity);
 	}
 
-	public function forceCompletion() {
+	public function forceCompletion(?v: Float) {
+		if (v != null) {
+			target = v;
+		}
 		value = target;
 		velocity = 0;
 		if (onUpdate != null) onUpdate(value, velocity);
