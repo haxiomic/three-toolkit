@@ -1,6 +1,5 @@
 package fluid;
 
-import TopLevel.extend;
 import three.TextureEncoding;
 import rendering.DualRenderTarget;
 import rendering.FragmentRenderer;

@@ -1,6 +1,5 @@
 package tool;
 
-import TopLevel.extend;
 import three.OrthographicCamera;
 import three.Scene;
 import three.WebGLRenderer;

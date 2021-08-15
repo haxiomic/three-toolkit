@@ -1,6 +1,5 @@
 package rendering;
 
-import TopLevel.extend;
 import mesh.ClipSpaceTriangle;
 import three.BlendingDstFactor;
 import three.ShaderMaterial;
