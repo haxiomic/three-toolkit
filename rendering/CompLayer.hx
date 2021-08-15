@@ -1,12 +1,12 @@
 package rendering;
 
+import Structure.extend;
 import mesh.ClipSpaceTriangle;
 import three.BlendingDstFactor;
 import three.ShaderMaterial;
 import three.Side;
 import three.Texture;
 import three.Uniform;
-import tool.StructureTools;
 
 /**
 	Render a texture that spans screen-space

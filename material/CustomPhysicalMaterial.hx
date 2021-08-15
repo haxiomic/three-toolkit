@@ -1,7 +1,8 @@
 package material;
 
+import Structure.extendAny;
+import Structure.extend;
 import three.MeshPhysicalMaterialParameters;
-import tool.StructureTools;
 import three.NormalMapTypes;
 import three.Vector2;
 import three.Color;
@@ -79,12 +80,12 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 			?defaultAttributeValues: haxe.DynamicAccess<Array<Float>>, // missing from type definitions
 		}
 	) {
-		super(StructureTools.extend({
+		super(extendAny({
 			defines: {
 				'STANDARD': '',
 				'PHYSICAL': '',
 			},
-			uniforms: StructureTools.extend(Three.ShaderLib.physical.uniforms, additionalUniforms),
+			uniforms: extendAny(Three.ShaderLib.physical.uniforms, additionalUniforms),
 			vertexShader: Three.ShaderLib.physical.vertexShader,
 			fragmentShader: Three.ShaderLib.physical.fragmentShader,
 			fog: true,			
