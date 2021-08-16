@@ -32,17 +32,26 @@ class FragmentRenderer {
 		?viewport: Vector4
 	) {
 		renderer.setRenderTarget(target);
-		renderer.getViewport(_oldViewport);
+
+		var restoreViewport = false;
 		if (viewport != null) {
+			restoreViewport = true;
+			renderer.getViewport(_oldViewport);
 			renderer.setViewport(viewport.x, viewport.y, viewport.z, viewport.w);
 		}
+
 		rttMesh.material = shader;
+
 		if (clearColor != null) {
 			renderer.setClearColor(clearColor);
 			renderer.clear(true, false, false);
 		}
+
 		renderer.render(rttScene, rttCamera);
-		renderer.setViewport(_oldViewport.x, _oldViewport.y, _oldViewport.z, _oldViewport.w);
+
+		if (restoreViewport) {
+			renderer.setViewport(_oldViewport.x, _oldViewport.y, _oldViewport.z, _oldViewport.w);
+		}
 	}
 
 }
