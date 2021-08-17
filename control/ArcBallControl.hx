@@ -8,11 +8,6 @@ import js.html.MouseEvent;
 import js.html.Element;
 import animator.Spring;
 
-enum abstract EventResponse (Int) {
-	var PreventDefaultAction;
-	var AllowDefaultAction;
-}
-
 /**
 	Soft arc ball camera
 
@@ -193,4 +188,9 @@ class ArcBallControl {
 		return AllowDefaultAction;
 	}
 
+}
+
+private enum abstract EventResponse (Int) {
+	var PreventDefaultAction;
+	var AllowDefaultAction;
 }
