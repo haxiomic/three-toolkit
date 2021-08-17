@@ -1,6 +1,6 @@
 package rendering;
 
-import rendering.PostProcess.fragmentRenderer;
+import three.WebGLRenderer;
 import three.Texture;
 import three.Uniform;
 import three.WebGLRenderTargetOptions;
@@ -18,8 +18,11 @@ class DualRenderTarget {
 	var a: WebGLRenderTarget;
 	var b: WebGLRenderTarget;
 
-	public function new(width: Float, height: Float, ?options: WebGLRenderTargetOptions) {
+	final postProcess: PostProcess;
+
+	public function new(renderer: WebGLRenderer, width: Float, height: Float, ?options: WebGLRenderTargetOptions) {
 		this.options = options;
+		this.postProcess = new PostProcess(renderer);
 		a = new WebGLRenderTarget(width, height, options);
 		b = new WebGLRenderTarget(width, height, options);
 		uniform = new Uniform(b.texture);
@@ -29,9 +32,10 @@ class DualRenderTarget {
 		var aNew = new WebGLRenderTarget(newWidth, newHeight, options);
 		var bNew = new WebGLRenderTarget(newWidth, newHeight, options);
 
-		// copy content to new texture (following whatever filtering params the textures use)
-		fragmentRenderer.render(aNew, shaders.Copy.get(a.texture));
-		fragmentRenderer.render(bNew, shaders.Copy.get(b.texture));
+		// // copy content to new texture (following whatever filtering params the textures use)
+		postProcess.blit(a.texture, aNew);
+		postProcess.blit(b.texture, bNew);
+
 		a.dispose();
 		b.dispose();
 

@@ -95,9 +95,9 @@ class FluidSimulation {
 		});
 
 		// use gamma decode when displaying the color texture (advection is still handled in linear-space)
-		colorTexture = new DualRenderTarget(width, height, extend(textureOptions, {encoding: TextureEncoding.GammaEncoding}));
-		velocityTexture = new DualRenderTarget(simulationWidth, simulationHeight, textureOptions);
-		pressureTexture = new DualRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
+		colorTexture = new DualRenderTarget(renderer, width, height, extend(textureOptions, {encoding: TextureEncoding.GammaEncoding}));
+		velocityTexture = new DualRenderTarget(renderer, simulationWidth, simulationHeight, textureOptions);
+		pressureTexture = new DualRenderTarget(renderer, simulationWidth, simulationHeight, textureOptionsNearest);
 		divergenceTexture = new WebGLRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
 
 		sharedUniforms = {
