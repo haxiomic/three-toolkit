@@ -148,7 +148,7 @@ class Blur1D extends RawShaderMaterial {
 
 		// Generate shaders
 		var maxVaryingRows = ctx.getParameter(RenderingContext.MAX_VARYING_VECTORS);
-		var maxVaryingVec2 = maxVaryingRows * 2; // seems like 2 varyings per row, but is this the guaranteed packing?
+		var maxVaryingVec2 = maxVaryingRows; // maybe more in practice?
 
 		var varyingCount = Std.int(Math.min(offsets.length, maxVaryingVec2));
 
