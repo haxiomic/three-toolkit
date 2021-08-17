@@ -60,11 +60,9 @@ class ArcBallControl {
 	public final position = new Vec3(0., 0., 0.);
 	public final orientation = new Quat(0, 0, 0, 1);
 
-	final interactionSurface: Element;
-
 	public function new(
 		options: {
-			interactionSurface: Element,
+			?interactionSurface: Element,
 			?angleAroundY: Float,
 			?angleAroundXZ: Float,
 			?radius: Float,
@@ -81,38 +79,41 @@ class ArcBallControl {
 		this.zoomSpeed = options.zoomSpeed;
 		this.strength = options.strength;
 		this.damping = options.damping;
-		this.interactionSurface = options.interactionSurface;
 		this.angleAroundY.forceCompletion(options.angleAroundY);
 		this.angleAroundXZ.forceCompletion(options.angleAroundXZ);
 		this.radius.forceCompletion(options.radius);
 
-		interactionSurface.addEventListener('mousedown', (e: MouseEvent) -> {
-			if (onPointerDown(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
-				e.preventDefault();
-			}
-		});
-		interactionSurface.addEventListener('contextmenu', (e: MouseEvent) -> {
-			if (onPointerUp(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
-				e.preventDefault();
-			}
-		});
-		Browser.window.addEventListener('mousemove', (e: MouseEvent) -> {
-			if (onPointerMove(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
-				e.preventDefault();
-			}
-		});
-		Browser.window.addEventListener('mouseup', (e: MouseEvent) -> {
-			if (onPointerUp(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
-				e.preventDefault();
-			}
-		});
-		interactionSurface.addEventListener('wheel', (e: WheelEvent) -> {
-			radius.target += e.deltaY * zoomSpeed;
+		var interactionSurface = options.interactionSurface;
+	
+		if (interactionSurface != null) {
+			interactionSurface.addEventListener('mousedown', (e: MouseEvent) -> {
+				if (onPointerDown(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
+					e.preventDefault();
+				}
+			});
+			interactionSurface.addEventListener('contextmenu', (e: MouseEvent) -> {
+				if (onPointerUp(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
+					e.preventDefault();
+				}
+			});
+			Browser.window.addEventListener('mousemove', (e: MouseEvent) -> {
+				if (onPointerMove(new Vec2(e.clientX, e.clientY), new Vec2(interactionSurface.clientWidth, interactionSurface.clientHeight)) == PreventDefaultAction) {
+					e.preventDefault();
+				}
+			});
+			Browser.window.addEventListener('mouseup', (e: MouseEvent) -> {
+				if (onPointerUp(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
+					e.preventDefault();
+				}
+			});
+			interactionSurface.addEventListener('wheel', (e: WheelEvent) -> {
+				radius.target += e.deltaY * zoomSpeed;
 
-			radius.target = Math.max(radius.target, 0);
+				radius.target = Math.max(radius.target, 0);
 
-			e.preventDefault();
-		}, {passive: false});
+				e.preventDefault();
+			}, {passive: false});
+		}
 	}
 
 	public inline function step(dt_s: Float) {
@@ -150,7 +151,7 @@ class ArcBallControl {
 	var _onDown_angleAroundXZ: Float = 0;
 	var _onDown_clientXY = new Vec2(0, 0);
 	var _isPointerDown = false;
-	inline function onPointerDown(clientXY: Vec2): EventResponse {
+	public inline function onPointerDown(clientXY: Vec2): EventResponse {
 		_isPointerDown = true;
 		_onDown_angleAroundY = angleAroundY.target;
 		_onDown_angleAroundXZ = angleAroundXZ.target;
@@ -158,13 +159,12 @@ class ArcBallControl {
 		return AllowDefaultAction;
 	}
 
-	inline function onPointerMove(clientXY: Vec2): EventResponse {
+	public inline function onPointerMove(clientXY: Vec2, surfaceSize: Vec2): EventResponse {
 		if (_isPointerDown) {
 			// normalize coordinates so dragSpeed is independent of screen size
-			var size = new Vec2(interactionSurface.clientWidth, interactionSurface.clientHeight);
-			var aspect = size.x / size.y;
-			var normXY = clientXY / size;
-			var normOnDownXY = _onDown_clientXY / size;
+			var aspect = surfaceSize.x / surfaceSize.y;
+			var normXY = clientXY / surfaceSize;
+			var normOnDownXY = _onDown_clientXY / surfaceSize;
 			var screenSpaceDelta = normXY - normOnDownXY;
 
 			angleAroundXZ.target = _onDown_angleAroundXZ + screenSpaceDelta.y * dragSpeed;
@@ -183,7 +183,7 @@ class ArcBallControl {
 		}
 	}
 
-	inline function onPointerUp(clientXY: Vec2): EventResponse {
+	public inline function onPointerUp(clientXY: Vec2): EventResponse {
 		_isPointerDown = false;
 		return AllowDefaultAction;
 	}
