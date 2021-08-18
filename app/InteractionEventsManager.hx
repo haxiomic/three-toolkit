@@ -1,5 +1,6 @@
 package app;
 
+import Main.canvas;
 import js.html.Element;
 import app.event.PointerEvent;
 import js.Browser.*;
@@ -8,15 +9,15 @@ import js.html.MouseEvent;
 import js.html.TouchEvent;
 import js.html.WheelEvent;
 
-class AppEventHost {
+@:nullSafety
+class InteractionEventsManager {
 	
-	public final appInstance: AppEventInterface;
 	public final el: Element;
+	final eventHandler: EventDispatcher;
 
-	public function new(appInstance: AppEventInterface, el: Element) {
-		// automatically create a el element with reasonable defaults
-		this.appInstance = appInstance;
+	public function new(el: Element) {
 		this.el = el;
+		this.eventHandler = new EventDispatcher();
 
 		if (el.tabIndex == null) {
 			// make the el focusable
@@ -47,13 +48,64 @@ class AppEventHost {
 		onVisibilityChange();
 	}
 
+	public inline function onResize(cb) {
+		eventHandler.onResizeCallbacks.push(cb);
+		return { remove: () -> eventHandler.onResizeCallbacks.remove(cb) }
+	}
+
+	public inline function onPointerDown(cb) {
+		eventHandler.onPointerDownCallbacks.push(cb);
+		return { remove: () -> eventHandler.onPointerDownCallbacks.remove(cb) }
+	}
+
+	public inline function onPointerMove(cb) {
+		eventHandler.onPointerMoveCallbacks.push(cb);
+		return { remove: () -> eventHandler.onPointerMoveCallbacks.remove(cb) }
+	}
+
+	public inline function onPointerUp(cb) {
+		eventHandler.onPointerUpCallbacks.push(cb);
+		return { remove: () -> eventHandler.onPointerUpCallbacks.remove(cb) }
+	}
+
+	public inline function onPointerCancel(cb) {
+		eventHandler.onPointerCancelCallbacks.push(cb);
+		return { remove: () -> eventHandler.onPointerCancelCallbacks.remove(cb) }
+	}
+
+	public inline function onWheel(cb) {
+		eventHandler.onWheelCallbacks.push(cb);
+		return { remove: () -> eventHandler.onWheelCallbacks.remove(cb) }
+	}
+
+	public inline function onKeyDown(cb) {
+		eventHandler.onKeyDownCallbacks.push(cb);
+		return { remove: () -> eventHandler.onKeyDownCallbacks.remove(cb) }
+	}
+
+	public inline function onKeyUp(cb) {
+		eventHandler.onKeyUpCallbacks.push(cb);
+		return { remove: () -> eventHandler.onKeyUpCallbacks.remove(cb) }
+	}
+
+	public inline function onActivate(cb) {
+		eventHandler.onActivateCallbacks.push(cb);
+		return { remove: () -> eventHandler.onActivateCallbacks.remove(cb) }
+	}
+
+	public inline function onDeactivate(cb) {
+		eventHandler.onDeactivateCallbacks.push(cb);
+		return { remove: () -> eventHandler.onDeactivateCallbacks.remove(cb) }
+	}
+
+
 	var elClientWidth: Null<Int> = null;
 	var elClientHeight: Null<Int> = null;
-	inline function onResize() {
+	inline function onResizeListener() {
 		if (elClientWidth != el.clientWidth || elClientHeight != el.clientHeight) {
 			elClientWidth = el.clientWidth;
 			elClientHeight = el.clientHeight;
-			appInstance.onResize(el.clientWidth, el.clientHeight);
+			eventHandler.onResize(el.clientWidth, el.clientHeight);
 		}
 	}
 
@@ -61,11 +113,11 @@ class AppEventHost {
 	function onVisibilityChange() {
 		switch (document.visibilityState) {
 			case VISIBLE: if (!haxeAppActivated) {
-				appInstance.onActivate();
+				eventHandler.onActivate();
 				haxeAppActivated = true;
 			}
 			case HIDDEN: if (haxeAppActivated) {
-				appInstance.onDeactivate();
+				eventHandler.onDeactivate();
 				haxeAppActivated = false;
 			}
 		}
@@ -73,7 +125,7 @@ class AppEventHost {
 
 	function addPointerEventListeners() {
 		// Pointer Input
-		function executePointerMethodFromMouseEvent(mouseEvent: MouseEvent, pointerMethod: (PointerEvent) -> Bool) {
+		function executePointerMethodFromMouseEvent(mouseEvent: MouseEvent, pointerMethod: (PointerEvent) -> EventResponse) {
 			// trackpad force
 			// var force = mouseEvent.force || mouseEvent.webkitForce;
 			var force: Float = if (js.Syntax.field(mouseEvent, 'force') != null) {
@@ -98,20 +150,22 @@ class AppEventHost {
 				y: mouseEvent.clientY,
 				width: 1,
 				height: 1,
+				viewWidth: canvas.clientWidth,
+				viewHeight: canvas.clientHeight,
 				pressure: pressure,
 				tangentialPressure: 0,
 				tiltX: 0,
 				tiltY: 0,
 				twist: 0,
 				nativeEvent: mouseEvent,
-			})) {
+			}) == PreventFurtherHandling) {
 				mouseEvent.preventDefault();
 			}
 		}
 
 		// Map<type, {primaryTouchIdentifier: Int, activeCount: Int}>
 		var touchInfoForType = new Map<String, {primaryTouchIdentifier: Int, activeCount: Int}>();
-		function getTouchInfoForType(type) {
+		function getTouchInfoForType(type): {primaryTouchIdentifier: Int, activeCount: Int} {
 			var touchInfo = touchInfoForType[type];
 			if (touchInfo == null) {
 				touchInfoForType[type] = touchInfo = {
@@ -122,7 +176,7 @@ class AppEventHost {
 			return touchInfo;
 		}
 
-		function executePointerMethodFromTouchEvent(touchEvent: TouchEvent, pointerMethod: (app.event.PointerEvent) -> Bool) {
+		function executePointerMethodFromTouchEvent(touchEvent: TouchEvent, pointerMethod: (app.event.PointerEvent) -> EventResponse) {
 			var buttonStates: {
 				button: Int,
 				buttons: Int,
@@ -192,22 +246,44 @@ class AppEventHost {
 					y: touch.clientY,
 					width: radiusX * 2,
 					height: radiusY * 2,
+					viewWidth: canvas.clientWidth,
+					viewHeight: canvas.clientHeight,
 					pressure: touch.force,
 					tangentialPressure: 0,
 					tiltX: Math.isFinite(tiltX) ? tiltX : 0,
 					tiltY: Math.isFinite(tiltY) ? tiltY : 0,
 					twist: touch.rotationAngle,
 					nativeEvent: touchEvent,
-				})) {
+				}) == PreventFurtherHandling) {
 					touchEvent.preventDefault();
 				}
 			}
 		}
 
-		var onPointerDown = (e) -> { Reflect.setField(e, 'nativeEvent', e); appInstance.onPointerDown(e); };
-		var onPointerMove = (e) -> { Reflect.setField(e, 'nativeEvent', e); appInstance.onPointerMove(e); };
-		var onPointerUp = (e) -> { Reflect.setField(e, 'nativeEvent', e); appInstance.onPointerUp(e); };
-		var onPointerCancel = (e) -> { Reflect.setField(e, 'nativeEvent', e); appInstance.onPointerCancel(e); };
+		var onPointerDown = (e) -> {
+			Reflect.setField(e, 'nativeEvent', e);
+			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
+			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			eventHandler.onPointerDown(e);
+		};
+		var onPointerMove = (e) -> {
+			Reflect.setField(e, 'nativeEvent', e);
+			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
+			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			eventHandler.onPointerMove(e);
+		};
+		var onPointerUp = (e) -> {
+			Reflect.setField(e, 'nativeEvent', e);
+			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
+			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			eventHandler.onPointerUp(e);
+		};
+		var onPointerCancel = (e) -> {
+			Reflect.setField(e, 'nativeEvent', e);
+			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
+			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			eventHandler.onPointerCancel(e);
+		};
 
 		// use PointerEvent API if supported
 		if (js.Syntax.field(window, 'PointerEvent')) {
@@ -222,11 +298,11 @@ class AppEventHost {
 			window.addEventListener('mouseforcechanged', (e) -> executePointerMethodFromMouseEvent(e, onPointerMove));
 			window.addEventListener('mouseup', (e) -> executePointerMethodFromMouseEvent(e, onPointerUp));
 			var useCapture = true;
-			el.addEventListener('touchstart', (e) -> executePointerMethodFromTouchEvent(e, onPointerDown), { capture: useCapture,  }); // passive: false
-			window.addEventListener('touchmove', (e) -> executePointerMethodFromTouchEvent(e, onPointerMove), { capture: useCapture,  }); // passive: false
-			window.addEventListener('touchforcechange', (e) -> executePointerMethodFromTouchEvent(e, onPointerMove), { capture: useCapture,  }); // passive: true
-			window.addEventListener('touchend', (e) -> executePointerMethodFromTouchEvent(e, onPointerUp), {capture: useCapture, }); // passive: true
-			window.addEventListener('touchcancel', (e) -> executePointerMethodFromTouchEvent(e, onPointerCancel), { capture: useCapture,  }); // passive: true
+			el.addEventListener('touchstart', (e) -> executePointerMethodFromTouchEvent(e, onPointerDown), { capture: useCapture, passive: false }); // passive: false
+			window.addEventListener('touchmove', (e) -> executePointerMethodFromTouchEvent(e, onPointerMove), { capture: useCapture, passive: false }); // passive: false
+			window.addEventListener('touchforcechange', (e) -> executePointerMethodFromTouchEvent(e, onPointerMove), { capture: useCapture, passive: false }); // passive: true
+			window.addEventListener('touchend', (e) -> executePointerMethodFromTouchEvent(e, onPointerUp), {capture: useCapture, passive: false }); // passive: true
+			window.addEventListener('touchcancel', (e) -> executePointerMethodFromTouchEvent(e, onPointerCancel), { capture: useCapture, passive: false }); // passive: true
 		}
 	}
 
@@ -256,7 +332,7 @@ class AppEventHost {
 					deltaY_px = e.deltaY * 100;
 					deltaZ_px = e.deltaZ * 100;
 			}
-			if (appInstance.onWheel({
+			if (eventHandler.onWheel({
 				x: x_px,
 				y: y_px,
 				deltaX: deltaX_px,
@@ -269,23 +345,23 @@ class AppEventHost {
 				shiftKey: e.shiftKey,
 
 				nativeEvent: e,
-			})) {
+			}) == PreventFurtherHandling) {
 				e.preventDefault();
 			}
-		});
+		}, { passive: false });
 	}
 
 	function addKeyboardEventListeners() {
 		// keyboard event
 		window.addEventListener('keydown', (e: KeyboardEvent) -> {
 			var hasFocus = e.target == el;
-			if (appInstance.onKeyDown(cast e, hasFocus)) {
+			if (eventHandler.onKeyDown(cast e, hasFocus) == PreventFurtherHandling) {
 				e.preventDefault();
 			}
 		});
 		window.addEventListener('keyup', (e) -> {
 			var hasFocus = e.target == el;
-			if (appInstance.onKeyUp(cast e, hasFocus)) {
+			if (eventHandler.onKeyUp(cast e, hasFocus) == PreventFurtherHandling) {
 				e.preventDefault();
 			}
 		});
@@ -299,9 +375,7 @@ class AppEventHost {
 	function addResizeEventListeners() {
 		// we assume the el may resize if the window resizes
 		// however, you can call onResize() if the el resizes without the window resizing
-		window.addEventListener('resize', () -> onResize(), {
-			capture: false,
-		});
+		window.addEventListener('resize', () -> onResizeListener(), { capture: false });
 	}
 
 }
@@ -313,4 +387,102 @@ extern class TouchLevel2 extends js.html.Touch {
 	var touchType: String;
 	var altitudeAngle: Float;
 	var azimuthAngle: Float;
+}
+
+private class EventDispatcher implements InteractionEventsHandler {
+
+	public final onResizeCallbacks = new Array<(width: Float, height: Float) -> Void>();
+	public final onPointerDownCallbacks = new Array<PointerEvent -> EventResponse>();
+	public final onPointerMoveCallbacks = new Array<PointerEvent -> EventResponse>();
+	public final onPointerUpCallbacks = new Array<PointerEvent -> EventResponse>();
+	public final onPointerCancelCallbacks = new Array<PointerEvent -> EventResponse>();
+	public final onWheelCallbacks = new Array<(app.event.WheelEvent) -> EventResponse>();
+	public final onKeyDownCallbacks = new Array<(event: app.event.KeyboardEvent, hasFocus: Bool) -> EventResponse>();
+	public final onKeyUpCallbacks = new Array<(event: app.event.KeyboardEvent, hasFocus: Bool) -> EventResponse>();
+	public final onActivateCallbacks = new Array<() -> Void>();
+	public final onDeactivateCallbacks = new Array<() -> Void>();
+
+	public function new() {}
+
+	public function onResize(width: Float, height: Float): Void {
+		for (cb in onResizeCallbacks) {
+			cb(width, height); 
+		}
+	}
+
+	public function onPointerDown(event: PointerEvent): EventResponse {
+		for (cb in onPointerDownCallbacks) {
+			if (cb(event) == PreventFurtherHandling) {
+				return PreventFurtherHandling;
+			}
+		}
+		return AllowFurtherHandling;
+	}
+
+	public function onPointerMove(event: PointerEvent): EventResponse {
+		for (cb in onPointerMoveCallbacks) {
+			if (cb(event) == PreventFurtherHandling) {
+				return PreventFurtherHandling;
+			}
+		}
+		return AllowFurtherHandling;
+	}
+
+	public function onPointerUp(event: PointerEvent): EventResponse {
+		for (cb in onPointerUpCallbacks) {
+			if (cb(event) == PreventFurtherHandling) {
+				return PreventFurtherHandling;
+			}
+		}
+		return AllowFurtherHandling;
+	}
+
+	public function onPointerCancel(event: PointerEvent): EventResponse {
+		for (cb in onPointerCancelCallbacks) {
+			if (cb(event) == PreventFurtherHandling) {
+				return PreventFurtherHandling;
+			}
+		}
+		return AllowFurtherHandling;
+	}
+
+	public function onWheel(event: app.event.WheelEvent): EventResponse {
+		for (cb in onWheelCallbacks) {
+			if (cb(event) == PreventFurtherHandling) {
+				return PreventFurtherHandling;
+			}
+		}
+		return AllowFurtherHandling;
+	}
+
+	public function onKeyDown(event: app.event.KeyboardEvent, hasFocus: Bool): EventResponse {
+		for (cb in onKeyDownCallbacks) {
+			if (cb(event, hasFocus) == PreventFurtherHandling) {
+				return PreventFurtherHandling;
+			}
+		}
+		return AllowFurtherHandling;
+	}
+
+	public function onKeyUp(event: app.event.KeyboardEvent, hasFocus: Bool): EventResponse {
+		for (cb in onKeyUpCallbacks) {
+			if (cb(event, hasFocus) == PreventFurtherHandling) {
+				return PreventFurtherHandling;
+			}
+		}
+		return AllowFurtherHandling;
+	}
+
+	public function onActivate(): Void {
+		for (cb in onActivateCallbacks) {
+			cb();
+		}
+	}
+
+	public function onDeactivate(): Void {
+		for (cb in onDeactivateCallbacks) {
+			cb();
+		}
+	}
+
 }

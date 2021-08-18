@@ -14,7 +14,7 @@ import app.event.*;
 	- Wheel events mirror browser [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent) where all deltas are in units of **points**, normalizing for `deltaMode`
 	- KeyboardEvents mirror browser [KeyboardEvent](https://w3c.github.io/uievents/#idl-keyboardevent) with an extra parameter `hasFocus` to detect if the view is focused for the event
 **/
-interface AppEventInterface {
+interface InteractionEventsHandler {
 
 	/**
 		- Called once after the view has been created
@@ -28,7 +28,7 @@ interface AppEventInterface {
 		Return true to prevent default behavior.
 		See https://www.w3.org/TR/pointerevents/#the-pointerdown-event
 	**/
-	function onPointerDown(event: PointerEvent): Bool;
+	function onPointerDown(event: PointerEvent): EventResponse;
 
 	/**
 		Called when an active pointer changes either position or pressure (if supported).
@@ -36,42 +36,42 @@ interface AppEventInterface {
 		Return true to prevent default behavior.
 		See https://www.w3.org/TR/pointerevents/#the-pointermove-event
 	**/
-	function onPointerMove(event: PointerEvent): Bool;
+	function onPointerMove(event: PointerEvent): EventResponse;
 
 	/**
 		Called when a pointer (mouse, touch or pen) is activated, for a mouse this happens when a button is released.
 		Return true to prevent default behavior.
 		See https://www.w3.org/TR/pointerevents/#the-pointerup-event
 	**/
-	function onPointerUp(event: PointerEvent): Bool;
+	function onPointerUp(event: PointerEvent): EventResponse;
 
 	/**
 		Called when the pointer is unlikely to continue to produce events or the interaction was interrupted by a gesture recognition.
 		Return true to prevent default behavior.
 		See https://www.w3.org/TR/pointerevents/#the-pointercancel-event
 	**/
-	function onPointerCancel(event: PointerEvent): Bool;
+	function onPointerCancel(event: PointerEvent): EventResponse;
 
 	/**
 		Called when a scroll interaction is performed on the view.
 		Return true to prevent default behavior.
 		If `ctrlKey` is true, the event can be assumed to be a pinch gesture on a trackpad.
 	**/
-	function onWheel(event: WheelEvent): Bool;
+	function onWheel(event: WheelEvent): EventResponse;
 
 	/**
 		Called when a key is pressed down with the view focused.
 		Return true to prevent default behavior.
 		`hasFocus` is true if our view has input focus for the event. For `hasFocus` to be correct the canvas needs to be focusable. This requires setting the `tabIndex` attribute on the canvas
 	**/
-	function onKeyDown(event: KeyboardEvent, hasFocus: Bool): Bool;
+	function onKeyDown(event: KeyboardEvent, hasFocus: Bool): EventResponse;
 
 	/**
 		Called when a key is released with the view focused.
 		Return true to prevent default behavior.
 		`hasFocus` is true if our view has input focus for the event. For `hasFocus` to be correct the canvas needs to be focusable. This requires setting the `tabIndex` attribute on the canvas
 	**/
-	function onKeyUp(event: KeyboardEvent, hasFocus: Bool): Bool;
+	function onKeyUp(event: KeyboardEvent, hasFocus: Bool): EventResponse;
 
 	/**
 		Called when the haxe view goes from a deactivated state (hidden view, minimized tab, background-mode app) to a foreground active state.

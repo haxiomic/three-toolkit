@@ -1,12 +1,13 @@
 package control;
 
-import math.Quat;
 import Structure.extend;
-import js.html.WheelEvent;
-import js.Browser;
-import js.html.MouseEvent;
-import js.html.Element;
 import animator.Spring;
+import app.EventResponse;
+import js.Browser;
+import js.html.Element;
+import js.html.MouseEvent;
+import js.html.WheelEvent;
+import math.Quat;
 
 /**
 	Soft arc ball camera
@@ -63,6 +64,7 @@ class ArcBallControl {
 	public function new(
 		options: {
 			?interactionSurface: Element,
+			?interactionEventsManager: app.InteractionEventsManager,
 			?angleAroundY: Float,
 			?angleAroundXZ: Float,
 			?radius: Float,
@@ -84,25 +86,40 @@ class ArcBallControl {
 		this.radius.forceCompletion(options.radius);
 
 		var interactionSurface = options.interactionSurface;
-	
-		if (interactionSurface != null) {
+		var interactionEventsManager = options.interactionEventsManager;
+
+		if (interactionEventsManager != null) {
+
+			interactionEventsManager.onPointerDown((e) -> onPointerDown(new Vec2(e.x, e.y)));
+			interactionEventsManager.onPointerMove((e) -> {
+				trace(e.x, e.y, e.viewWidth, e.viewHeight);
+				onPointerMove(new Vec2(e.x, e.y), new Vec2(e.viewWidth, e.viewHeight));
+			});
+			interactionEventsManager.onPointerUp((e) -> onPointerUp(new Vec2(e.x, e.y)));
+			interactionEventsManager.onWheel((e) -> {
+				radius.target += e.deltaY * zoomSpeed;
+				radius.target = Math.max(radius.target, 0);
+				return PreventFurtherHandling;
+			});
+			
+		} else if (interactionSurface != null) {
 			interactionSurface.addEventListener('mousedown', (e: MouseEvent) -> {
-				if (onPointerDown(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
+				if (onPointerDown(new Vec2(e.clientX, e.clientY)) == PreventFurtherHandling) {
 					e.preventDefault();
 				}
 			});
 			interactionSurface.addEventListener('contextmenu', (e: MouseEvent) -> {
-				if (onPointerUp(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
+				if (onPointerUp(new Vec2(e.clientX, e.clientY)) == PreventFurtherHandling) {
 					e.preventDefault();
 				}
 			});
 			Browser.window.addEventListener('mousemove', (e: MouseEvent) -> {
-				if (onPointerMove(new Vec2(e.clientX, e.clientY), new Vec2(interactionSurface.clientWidth, interactionSurface.clientHeight)) == PreventDefaultAction) {
+				if (onPointerMove(new Vec2(e.clientX, e.clientY), new Vec2(interactionSurface.clientWidth, interactionSurface.clientHeight)) == PreventFurtherHandling) {
 					e.preventDefault();
 				}
 			});
 			Browser.window.addEventListener('mouseup', (e: MouseEvent) -> {
-				if (onPointerUp(new Vec2(e.clientX, e.clientY)) == PreventDefaultAction) {
+				if (onPointerUp(new Vec2(e.clientX, e.clientY)) == PreventFurtherHandling) {
 					e.preventDefault();
 				}
 			});
@@ -156,7 +173,7 @@ class ArcBallControl {
 		_onDown_angleAroundY = angleAroundY.target;
 		_onDown_angleAroundXZ = angleAroundXZ.target;
 		_onDown_clientXY.copyFrom(clientXY);
-		return AllowDefaultAction;
+		return AllowFurtherHandling;
 	}
 
 	public inline function onPointerMove(clientXY: Vec2, surfaceSize: Vec2): EventResponse {
@@ -177,20 +194,15 @@ class ArcBallControl {
 
 			angleAroundY.target = _onDown_angleAroundY - fadeMultiplier * flip * screenSpaceDelta.x * dragSpeed * aspect;
 
-			return PreventDefaultAction;
+			return PreventFurtherHandling;
 		} else {
-			return AllowDefaultAction;
+			return AllowFurtherHandling;
 		}
 	}
 
 	public inline function onPointerUp(clientXY: Vec2): EventResponse {
 		_isPointerDown = false;
-		return AllowDefaultAction;
+		return AllowFurtherHandling;
 	}
 
-}
-
-private enum abstract EventResponse (Int) {
-	var PreventDefaultAction;
-	var AllowDefaultAction;
 }

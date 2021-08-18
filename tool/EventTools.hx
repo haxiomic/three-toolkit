@@ -1,4 +1,4 @@
-package app;
+package tool;
 
 import js.html.WheelEvent;
 
