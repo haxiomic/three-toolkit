@@ -79,6 +79,26 @@ function extendAny<T>(base: T, extendWidth: Any): T {
 	return cast extended;
 }
 
+macro function copyFields(from: Expr, to: Expr) {
+	var fromType = Context.followWithAbstracts(Context.typeof(from));
+	var fieldNames = switch fromType {
+		case TAnonymous(_.get() => anon): anon.fields.map(f -> f.name);
+		case TInst(_.get() => classType, _): classType.fields.get().map(f -> f.name);
+		default:
+			Context.fatalError('Can only copy from structures and classes', Context.currentPos());
+	}
+	var exprs = [
+		for (name in fieldNames) {
+			macro to.$name = from.$name;
+		}
+	];
+	return macro {
+		var from = $from;
+		var to = $to;
+		$b{exprs};
+	}
+}
+
 /**
 	Recursively unwraps Null<T> to T
 **/
