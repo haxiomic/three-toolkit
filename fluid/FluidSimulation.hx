@@ -185,6 +185,15 @@ class FluidSimulation {
 		sharedUniforms.divergence.value = divergenceTexture.texture;
 	}
 
+	public function clipSpaceToSimulationSpaceX(x: Float) {
+		var aspect = this.simulationWidth / this.simulationHeight;
+		return x * aspect;
+	}
+
+	public function clipSpaceToSimulationSpaceY(y: Float) {
+		return y;
+	}
+
 	static public final precision = 'mediump';
 	static final vertexShader = CompileTime.embedShader('./vertex-shader.glsl');
 	static public function getVertexShader(uv: Bool, finiteDifferences: Bool, simulationPosition: Bool) {
