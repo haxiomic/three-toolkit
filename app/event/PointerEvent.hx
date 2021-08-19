@@ -103,9 +103,4 @@ class PointerEvent {
 	**/
 	final twist: Float;
 
-	/**
-		Reference to original native event object – type varies between platform
-	**/
-	final nativeEvent: #if js js.html.Event #else Dynamic #end;
-
 }

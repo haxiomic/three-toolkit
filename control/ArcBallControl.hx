@@ -92,7 +92,6 @@ class ArcBallControl {
 
 			interactionEventsManager.onPointerDown((e) -> onPointerDown(new Vec2(e.x, e.y)));
 			interactionEventsManager.onPointerMove((e) -> {
-				trace(e.x, e.y, e.viewWidth, e.viewHeight);
 				onPointerMove(new Vec2(e.x, e.y), new Vec2(e.viewWidth, e.viewHeight));
 			});
 			interactionEventsManager.onPointerUp((e) -> onPointerUp(new Vec2(e.x, e.y)));

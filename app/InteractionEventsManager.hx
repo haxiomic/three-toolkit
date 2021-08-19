@@ -1,9 +1,9 @@
 package app;
 
 import Main.canvas;
-import js.html.Element;
 import app.event.PointerEvent;
 import js.Browser.*;
+import js.html.Element;
 import js.html.KeyboardEvent;
 import js.html.MouseEvent;
 import js.html.TouchEvent;
@@ -14,6 +14,8 @@ class InteractionEventsManager {
 	
 	public final el: Element;
 	final eventHandler: EventDispatcher;
+
+	public var primaryPointer: Null<PointerEvent> = null;
 
 	public function new(el: Element) {
 		this.el = el;
@@ -157,7 +159,6 @@ class InteractionEventsManager {
 				tiltX: 0,
 				tiltY: 0,
 				twist: 0,
-				nativeEvent: mouseEvent,
 			}) == PreventFurtherHandling) {
 				mouseEvent.preventDefault();
 			}
@@ -253,35 +254,42 @@ class InteractionEventsManager {
 					tiltX: Math.isFinite(tiltX) ? tiltX : 0,
 					tiltY: Math.isFinite(tiltY) ? tiltY : 0,
 					twist: touch.rotationAngle,
-					nativeEvent: touchEvent,
 				}) == PreventFurtherHandling) {
 					touchEvent.preventDefault();
 				}
 			}
 		}
 
-		var onPointerDown = (e) -> {
-			Reflect.setField(e, 'nativeEvent', e);
+		var onPointerDown = (e: PointerEvent) -> {
 			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
 			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			if (e.isPrimary) {
+				primaryPointer = e;
+			}
 			eventHandler.onPointerDown(e);
 		};
-		var onPointerMove = (e) -> {
-			Reflect.setField(e, 'nativeEvent', e);
+		var onPointerMove = (e: PointerEvent) -> {
 			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
 			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			if (e.isPrimary) {
+				primaryPointer = e;
+			}
 			eventHandler.onPointerMove(e);
 		};
-		var onPointerUp = (e) -> {
-			Reflect.setField(e, 'nativeEvent', e);
+		var onPointerUp = (e: PointerEvent) -> {
 			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
 			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			if (e.isPrimary) {
+				primaryPointer = null;
+			}
 			eventHandler.onPointerUp(e);
 		};
-		var onPointerCancel = (e) -> {
-			Reflect.setField(e, 'nativeEvent', e);
+		var onPointerCancel = (e: PointerEvent) -> {
 			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
 			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			if (e.isPrimary) {
+				primaryPointer = null;
+			}
 			eventHandler.onPointerCancel(e);
 		};
 
