@@ -14,8 +14,8 @@ import three.WebGLRenderer;
 
 class PostProcess {
 
+	public final fragmentRenderer: FragmentRenderer;
 	final renderer: WebGLRenderer;
-	final fragmentRenderer: FragmentRenderer;
 	final renderTargetStore: RenderTargetStore;
 	final copyShader = new CopyShader();
 	final gl: RenderingContext;
