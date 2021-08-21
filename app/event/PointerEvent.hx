@@ -56,14 +56,24 @@ class PointerEvent {
 	final y: Float;
 	
 	/**
-		Horizontal dimension in units of **points** For inputs with a contact size (defaults to 1 for point-like inputs)
+		Horizontal dimension in units of **points** for inputs with a contact size (defaults to 1 for point-like inputs)
 	**/
 	final width: Float;
 
 	/**
-		Vertical dimension in units of **points** For inputs with a contact size (defaults to 1 for point-like inputs)
+		Vertical dimension in units of **points** for inputs with a contact size (defaults to 1 for point-like inputs)
 	**/
 	final height: Float;
+
+	/**
+		Width of view where the event occurred in **points** units
+	**/
+	final viewWidth: Float;
+
+	/**
+		Height of view where the event occurred in **points** units
+	**/
+	final viewHeight: Float;
 
 	/**
 		Normalized pressure ranging from 0 to 1. For hardware that does not support pressure this value will be 0.5.
@@ -92,10 +102,5 @@ class PointerEvent {
 		Clockwise rotation in units of **degrees** (see `rotationAngle` for touches https://w3c.github.io/touch-events/#dom-touch-rotationangle)
 	**/
 	final twist: Float;
-
-	/**
-		Reference to original native event object – type varies between platform
-	**/
-	final nativeEvent: #if js js.html.Event #else Dynamic #end;
 
 }

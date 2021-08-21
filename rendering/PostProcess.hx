@@ -1,10 +1,7 @@
 package rendering;
 
-import shaders.Blur1D;
-import three.TextureFilter;
-import Structure.extend;
-import three.WebGLRenderTargetOptions;
 import js.html.webgl.RenderingContext;
+import shaders.Blur1D;
 import three.MathUtils;
 import three.RawShaderMaterial;
 import three.Texture;
@@ -156,7 +153,13 @@ class CopyShader extends RawShaderMaterial {
 					gl_FragColor = texture2D(uTexture, vUv);
 				}
 			',
-			side: DoubleSide
+			side: DoubleSide,
+			depthWrite: false,
+			depthTest: false,
+			fog: false,
+			lights: false,
+			toneMapped: false,
+			blending: NoBlending,
 		});
 	}
 
