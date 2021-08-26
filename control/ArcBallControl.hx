@@ -27,7 +27,7 @@ class ArcBallControl {
 		angleAroundY: 0,
 		angleAroundXZ: 0,
 		radius: 1,
-		zoomSpeed: 0.001,
+		zoomSpeed: 1,
 	}
 
 	// arc ball smoothing
@@ -96,7 +96,7 @@ class ArcBallControl {
 			});
 			interactionEventsManager.onPointerUp((e) -> onPointerUp(new Vec2(e.x, e.y)));
 			interactionEventsManager.onWheel((e) -> {
-				radius.target += e.deltaY * zoomSpeed;
+				radius.target += e.deltaY * zoomSpeed / 1000;
 				radius.target = Math.max(radius.target, 0);
 				return PreventFurtherHandling;
 			});
