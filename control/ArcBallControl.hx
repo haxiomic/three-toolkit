@@ -123,7 +123,7 @@ class ArcBallControl {
 				}
 			});
 			interactionSurface.addEventListener('wheel', (e: WheelEvent) -> {
-				radius.target += e.deltaY * zoomSpeed;
+				radius.target += e.deltaY * zoomSpeed / 1000;
 
 				radius.target = Math.max(radius.target, 0);
 
