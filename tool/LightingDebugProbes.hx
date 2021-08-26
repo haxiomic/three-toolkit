@@ -7,7 +7,7 @@ import three.MeshPhysicalMaterial;
 import three.SphereGeometry;
 import three.Object3D;
 
-class LightingDisplayProbes extends Object3D {
+class LightingDebugProbes extends Object3D {
 
 	public function new() {
 		super();

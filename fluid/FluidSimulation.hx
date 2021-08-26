@@ -45,6 +45,7 @@ class FluidSimulation {
 
 	public var width(default, null): Int;
 	public var height(default, null): Int;
+	public var periodicBoundary(get, set): Bool;
 	final simulationTextureScale: Float;
 	var simulationWidth: Int;
 	var simulationHeight: Int;
@@ -57,13 +58,14 @@ class FluidSimulation {
 	final pressureSolveShader: PressureSolve;
 	final pressureGradientSubtractShader: PressureGradientSubtract;
 
+	final textureOptions: WebGLRenderTargetOptions;
 	final textureOptionsNearest: WebGLRenderTargetOptions;
 
 	public function new(
 		renderer: WebGLRenderer,
 		width: Int,
 		height: Int,
-		wrappedBoundary: Bool,
+		periodicBoundary: Bool,
 		physicsScale: Float,
 		simulationTextureScale = 0.25
 	) {
@@ -71,11 +73,12 @@ class FluidSimulation {
 		this.width = width;
 		this.height = height;
 		this.simulationTextureScale = simulationTextureScale;
+		this._periodicBoundary = periodicBoundary;
 
 		simulationWidth = Std.int(width * simulationTextureScale);
 		simulationHeight = Std.int(height * simulationTextureScale);
 
-		var textureOptions: WebGLRenderTargetOptions = {
+		textureOptions = {
 			encoding: LinearEncoding,
 			generateMipmaps: false,
 			stencilBuffer: false,
@@ -85,8 +88,8 @@ class FluidSimulation {
 			minFilter: LinearFilter,
 			magFilter: LinearFilter,
 			format: PixelFormat.RGBAFormat,
-			wrapT: wrappedBoundary ? RepeatWrapping : ClampToEdgeWrapping,
-			wrapS: wrappedBoundary ? RepeatWrapping : ClampToEdgeWrapping,
+			wrapT: periodicBoundary ? RepeatWrapping : ClampToEdgeWrapping,
+			wrapS: periodicBoundary ? RepeatWrapping : ClampToEdgeWrapping,
 		}
 
 		textureOptionsNearest = extend(textureOptions, {
@@ -108,7 +111,7 @@ class FluidSimulation {
 			rdx: new Uniform(1.0 / physicsScale),
 			halfRdx: new Uniform(0.5 / physicsScale),
 			dxAlpha: new Uniform(-physicsScale * physicsScale),
-			velocityBoundaryEnabled: new Uniform(!wrappedBoundary),
+			velocityBoundaryEnabled: new Uniform(!periodicBoundary),
 			velocity: velocityTexture.uniform,
 			pressure: pressureTexture.uniform,
 			divergence: new Uniform(divergenceTexture.texture),
@@ -192,6 +195,26 @@ class FluidSimulation {
 
 	public function clipSpaceToSimulationSpaceY(y: Float) {
 		return y;
+	}
+
+	var _periodicBoundary = false;
+	function get_periodicBoundary() {
+		return _periodicBoundary;
+	}
+
+	function set_periodicBoundary(v: Bool) {
+		sharedUniforms.velocityBoundaryEnabled.value = !v;
+		
+		textureOptions.wrapT = v ? RepeatWrapping : ClampToEdgeWrapping;
+		textureOptions.wrapS = v ? RepeatWrapping : ClampToEdgeWrapping;
+		
+		colorTexture.setOptions(textureOptions);
+		velocityTexture.setOptions(textureOptions);
+		pressureTexture.setOptions(textureOptions);
+		divergenceTexture.dispose();
+		divergenceTexture = new WebGLRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
+		sharedUniforms.divergence.value = divergenceTexture.texture;
+		return _periodicBoundary = v;
 	}
 
 	static public final precision = 'mediump';

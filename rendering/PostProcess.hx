@@ -1,5 +1,7 @@
 package rendering;
 
+import three.Blending;
+import three.BlendingDstFactor;
 import js.html.webgl.RenderingContext;
 import shaders.Blur1D;
 import three.MathUtils;
@@ -29,15 +31,40 @@ class PostProcess {
 	}
 
 	var _blit_viewport = new Vector4();
-	public function blit(source: Texture, target: Null<WebGLRenderTarget>) {
- 		this.copyShader.setParams(source);
-		var viewport = if (target != null) {
-			target.viewport;
-		} else {
-			// drawing to canvas
-			_blit_viewport.set(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+	public inline function blit(
+		source: Texture,
+		target: Null<WebGLRenderTarget>,
+		?options: {
+			viewport: Vector4,
+			clearColor: Null<Int>,
+			blending: Blending,
+			blendSrc: BlendingDstFactor,
+			blendDst: BlendingDstFactor,
+			transparent: Bool,
+			opacity: Float,
 		}
- 		this.fragmentRenderer.render(target, this.copyShader, 0x000000, viewport);
+	) {
+		var options = options != null ? options: {
+			clearColor: null,
+			viewport: if (target != null) {
+					target.viewport;
+				} else {
+					// drawing to canvas
+					_blit_viewport.set(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+				},
+			blending: NoBlending,
+			blendSrc: BlendingDstFactor.OneFactor,
+			blendDst: BlendingDstFactor.OneMinusSrcAlphaFactor,
+			transparent: false,
+			opacity: 1.,
+		};
+ 		copyShader.setParams(source, options.opacity);
+		copyShader.blending = options.blending;
+		copyShader.blendSrc = options.blendSrc;
+		copyShader.blendDst = options.blendDst;
+		copyShader.transparent = options.transparent;
+		copyShader.opacity = options.opacity;
+ 		this.fragmentRenderer.render(target, copyShader, options.clearColor, options.viewport);
 	}
 
 	public function resize(uid: String, source: Texture, width: Float, height: Float): rendering.Texture {
@@ -60,7 +87,7 @@ class PostProcess {
 
 		// hopefully the gc will eventually get the gpu framebuffer structure
 
-		copyShader.setParams(source);
+		copyShader.setParams(source, 1.);
 		fragmentRenderer.render(target, copyShader);
 	
 		return target.texture;
@@ -131,11 +158,13 @@ class PostProcess {
 class CopyShader extends RawShaderMaterial {
 
 	final uTexture = new Uniform(null);
+	final uOpacity = new Uniform(null);
 
 	public function new() {
 		super({
 			uniforms: {
 				uTexture: uTexture,
+				uOpacity: uOpacity,
 			},
 			vertexShader: '
 				attribute vec2 position;
@@ -148,9 +177,11 @@ class CopyShader extends RawShaderMaterial {
 			fragmentShader: '
 				precision highp float;
 				uniform sampler2D uTexture;
+				uniform float uOpacity;
 				varying vec2 vUv;
 				void main() {
 					gl_FragColor = texture2D(uTexture, vUv);
+					gl_FragColor.a *= uOpacity;
 				}
 			',
 			side: DoubleSide,
@@ -163,8 +194,9 @@ class CopyShader extends RawShaderMaterial {
 		});
 	}
 
-	public function setParams(texture: Texture) {
+	public function setParams(texture: Texture, opacity: Float) {
 		uTexture.value = texture;
+		uOpacity.value = opacity;
 	}
 
 }

@@ -13,7 +13,7 @@ class DualRenderTarget {
 	public var width(get, null): Int;
 	public var height(get, null): Int;
 
-	final options: WebGLRenderTargetOptions;
+	var options: WebGLRenderTargetOptions;
 
 	var a: WebGLRenderTarget;
 	var b: WebGLRenderTarget;
@@ -26,6 +26,12 @@ class DualRenderTarget {
 		a = new WebGLRenderTarget(width, height, options);
 		b = new WebGLRenderTarget(width, height, options);
 		uniform = new Uniform(b.texture);
+	}
+
+	public function setOptions(newOptions: WebGLRenderTargetOptions) {
+		this.options = newOptions;
+		// recreate the render targets
+		this.resize(this.width, this.height);
 	}
 
 	public function resize(newWidth: Int, newHeight: Int) {
