@@ -42,7 +42,7 @@ class PosDeltaSampler {
 		this.positionTexture = positionTexture;
 		this.dataFormat = dataFormat;
 
-		this.renderTarget = new DualRenderTarget(2, 1, {
+		this.renderTarget = new DualRenderTarget(renderer, 2, 1, {
 			minFilter: NearestFilter,
 			magFilter: NearestFilter,
 			encoding: LinearEncoding,
@@ -105,7 +105,7 @@ class PosDeltaSampler {
 		(this.uPointerUv.value: Vector2).copy(pointerUv);
 
 		this.fragmentRenderer.render(renderTarget.getRenderTarget(), shader);
-		renderTarget.afterRender();
+		renderTarget.swap();
 
 		uPosTexture.value = renderTarget.getTexture();
 	}
