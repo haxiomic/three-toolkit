@@ -73,12 +73,13 @@ class EnvironmentMaterial extends ShaderMaterial {
 			'
 				uniform float uRoughness;
 				#include <envmap_common_pars_fragment>
+				#ifdef USE_ENVMAP
 				varying vec3 vWorldDirection;
+				#endif
 				#include <cube_uv_reflection_fragment>
 				void main() {
-					vec3 vReflect = vWorldDirection;
 					#ifdef USE_ENVMAP
-						vec3 reflectVec = vReflect;
+						vec3 reflectVec = vWorldDirection;
 						#ifdef ENVMAP_TYPE_CUBE
 							vec4 envColor = textureCube( envMap, vec3( flipEnvMap * reflectVec.x, reflectVec.yz ) );
 						#elif defined( ENVMAP_TYPE_CUBE_UV )
