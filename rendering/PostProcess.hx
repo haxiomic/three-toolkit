@@ -1,5 +1,6 @@
 package rendering;
 
+import three.MeshBasicMaterial;
 import math.Scalar;
 import three.Blending;
 import three.BlendingDstFactor;
@@ -65,6 +66,12 @@ class PostProcess {
 		copyShader.transparent = options.transparent;
 		copyShader.opacity = options.opacity;
  		this.fragmentRenderer.render(target, copyShader, options.clearColor, options.viewport);
+	}
+
+	var _blitBasicMaterial = new MeshBasicMaterial({color: 0xFFFFFF});
+	public function blitViaBasicMaterial(source: Texture, target: Null<WebGLRenderTarget>) {
+		_blitBasicMaterial.map = source;
+		this.fragmentRenderer.render(target, _blitBasicMaterial, 0xFF00FF);
 	}
 
 	public function resize(uid: String, source: Texture, width: Float, height: Float): rendering.Texture {
@@ -181,6 +188,7 @@ class CopyShader extends RawShaderMaterial {
 				uniform sampler2D uTexture;
 				uniform float uOpacity;
 				varying vec2 vUv;
+
 				void main() {
 					gl_FragColor = texture2D(uTexture, vUv);
 					gl_FragColor.a *= uOpacity;
@@ -192,6 +200,7 @@ class CopyShader extends RawShaderMaterial {
 			fog: false,
 			lights: false,
 			toneMapped: false,
+
 			blending: NoBlending,
 		});
 
