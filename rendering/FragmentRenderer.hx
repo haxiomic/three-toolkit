@@ -1,5 +1,6 @@
 package rendering;
 
+import three.Material;
 import three.RawShaderMaterial;
 import mesh.ClipSpaceTriangle;
 import three.OrthographicCamera;
@@ -28,7 +29,7 @@ class FragmentRenderer {
 	var _oldViewport = new Vector4();
 	public function render(
 		target: Null<WebGLRenderTarget>,
-		shader: ShaderMaterial,
+		material: Material,
 		?clearColor: Int,
 		?viewport: Vector4
 	) {
@@ -41,7 +42,7 @@ class FragmentRenderer {
 			renderer.setViewport(viewport.x, viewport.y, viewport.z, viewport.w);
 		}
 
-		rttMesh.material = shader;
+		rttMesh.material = material;
 
 		if (clearColor != null) {
 			renderer.setClearColor(clearColor);
