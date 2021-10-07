@@ -22,7 +22,9 @@ class ClipSpaceTriangle<T: Material> extends Mesh<BufferGeometry, T> {
 			 3, -1,
 			-1,  3,
 		]);
+		var uv = new Float32Array(triangle.map(v -> v * 0.5 + 0.5));
 		buffer.setAttribute('position', new BufferAttribute(triangle, 2));
+		buffer.setAttribute('uv', new BufferAttribute(uv, 2));
 
 		buffer;
 	};
