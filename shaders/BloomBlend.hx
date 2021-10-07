@@ -14,11 +14,14 @@ class BloomBlend extends RawShaderMaterial {
 	}
 	static final instance = new BloomBlend();
 
-	public final uTexture = new Uniform(cast null);
-	public final uBoomAlpha = new Uniform(0.1);
-	public final uBoomExponent = new Uniform(1.);
+	public final uTexture: Uniform<Texture>;
+	public final uBoomAlpha: Uniform<Float>;
+	public final uBoomExponent: Uniform<Float>;
 
 	public function new() {
+		var uTexture = new Uniform(cast null);
+		var uBoomAlpha = new Uniform(0.1);
+		var uBoomExponent = new Uniform(1.);
 		super({
 			uniforms: {
 				uTexture: uTexture,
@@ -53,6 +56,10 @@ class BloomBlend extends RawShaderMaterial {
 			side: DoubleSide,
 			blending: AdditiveBlending,
 		});
+
+		this.uTexture = uTexture;
+		this.uBoomAlpha = uBoomAlpha;
+		this.uBoomExponent = uBoomExponent;
 	}
 
 }

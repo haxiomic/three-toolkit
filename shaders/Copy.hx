@@ -12,9 +12,10 @@ class Copy extends RawShaderMaterial {
 	}
 	static final instance = new Copy();
 
-	public final uTexture = new Uniform(cast null);
+	public final uTexture: Uniform<Texture>;
 
 	public function new() {
+		var uTexture = new Uniform(cast null);
 		super({
 			uniforms: {
 				uTexture: uTexture,
@@ -42,6 +43,7 @@ class Copy extends RawShaderMaterial {
 			',
 			side: DoubleSide
 		});
+		this.uTexture = uTexture;
 	}
 
 }
