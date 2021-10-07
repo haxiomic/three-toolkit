@@ -1,3 +1,5 @@
+package rendering;
+
 import three.BufferGeometry;
 import three.Uniform;
 import three.ShaderMaterial;
