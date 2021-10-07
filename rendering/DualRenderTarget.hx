@@ -51,20 +51,18 @@ class DualRenderTarget {
 		uniform.value = b.texture;
 	}
 
-	public inline function swap() afterRender();
-
-	public function afterRender() {
+	public inline function swap() {
 		var t = a;
 		a = b;
 		b = t;
 		uniform.value = b.texture;
 	}
 
-	public function getRenderTarget() {
+	public inline function getRenderTarget() {
 		return a;
 	}
 
-	public function getTexture() {
+	public inline function getTexture() {
 		return b.texture;
 	}
 

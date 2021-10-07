@@ -1,5 +1,6 @@
 package rendering;
 
+import three.RawShaderMaterial;
 import mesh.ClipSpaceTriangle;
 import three.OrthographicCamera;
 import three.Scene;

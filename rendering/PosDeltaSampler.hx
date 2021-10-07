@@ -105,7 +105,7 @@ class PosDeltaSampler {
 		(this.uPointerUv.value: Vector2).copy(pointerUv);
 
 		this.fragmentRenderer.render(renderTarget.getRenderTarget(), shader);
-		renderTarget.afterRender();
+		renderTarget.swap();
 
 		uPosTexture.value = renderTarget.getTexture();
 	}
