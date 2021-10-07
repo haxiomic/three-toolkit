@@ -1,9 +1,12 @@
 package tool;
 
-import three.Geometry;
+import three.BufferGeometry;
 import three.Material;
 import three.Mesh;
-import three.Object3D;
+
+#if (three <= "0.133.0")
+private typedef Object3D = three.Object3D<three.Event>;
+#end
 
 class Object3DTools {
 
@@ -21,7 +24,7 @@ class Object3DTools {
 	/**
 		Recursive iteration of child meshes
 	**/
-	static public function iterateMeshes(obj: Object3D, cb: Mesh<Geometry, Material> -> Void) {
+	static public function iterateMeshes(obj: Object3D, cb: Mesh<BufferGeometry, Material> -> Void) {
 		if (Std.is(obj, Mesh)) cb(cast obj);
 		for (child in obj.children) {
 			if (Std.is(child, Mesh)) cb(cast child);
@@ -36,7 +39,7 @@ class Object3DTools {
 		}
 	}
 
-	static public function forEachDescendantMesh(obj: Object3D, cb: Mesh<Geometry, Material> -> Void) {
+	static public function forEachDescendantMesh(obj: Object3D, cb: Mesh<BufferGeometry, Material> -> Void) {
 		for (child in obj.children) {
 			if (Std.is(child, Mesh)) cb(cast child);
 			forEachDescendantMesh(child, cb);

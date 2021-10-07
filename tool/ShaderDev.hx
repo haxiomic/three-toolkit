@@ -1,26 +1,23 @@
 package tool;
 
+import three.BufferAttribute;
+import three.BufferGeometry;
+import three.Mesh;
 import three.OrthographicCamera;
 import three.Scene;
-import three.WebGLRenderer;
-import three.WebGLRenderTarget;
-import three.BufferAttribute;
-import three.Side;
-import three.BufferGeometry;
-import three.ShaderMaterialParameters;
-import three.PlaneGeometry;
-import three.Plane;
-import three.Mesh;
 import three.ShaderMaterial;
-import mesh.ClipSpaceTriangle;
+import three.ShaderMaterialParameters;
+import three.Side;
+import three.WebGLRenderTarget;
+import three.WebGLRenderer;
 
 class ShaderDev extends Mesh<BufferGeometry, ShaderMaterial> {
 
 	public final shaderMaterial: ShaderMaterial;
 
 	public function new(parameters: ShaderMaterialParameters) {
-		this.shaderMaterial = new ShaderMaterial(
-			extend(
+		var shaderMaterial = new ShaderMaterial(
+			Structure.extend(
 				{
 					vertexShader: '
 						varying vec2 vUv;
@@ -51,6 +48,7 @@ class ShaderDev extends Mesh<BufferGeometry, ShaderMaterial> {
 		unitQuad.setAttribute('position', position);
 		super(unitQuad, shaderMaterial);
 		this.frustumCulled = false;
+		this.shaderMaterial = shaderMaterial;
 	}
 
 	public function renderToTexture(renderer: WebGLRenderer, renderTarget: WebGLRenderTarget) {

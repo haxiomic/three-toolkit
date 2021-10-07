@@ -4,10 +4,12 @@ This is an assortment of classes I use when developing three.js haxe projects. F
 
 Happy to accept PRs and issues!
 
-I use three.js r121 via dts2hx (although newer versions will likely work too)
+## Requirements
+- I use three.js r133 via dts2hx, other version may work
+- three.js r133 requires `-D js-es=6` (however three.js r121 does not)
 
 ```
-npm install three@0.121.1 dts2hx
+npm install three@0.133.0 @types/three@0.133.0 dts2hx
 npx dts2hx three
 ```
 

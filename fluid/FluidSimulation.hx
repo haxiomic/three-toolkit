@@ -67,7 +67,8 @@ class FluidSimulation {
 		height: Int,
 		periodicBoundary: Bool,
 		physicsScale: Float,
-		simulationTextureScale = 0.25
+		simulationTextureScale = 0.25,
+		generateMipmaps = false
 	) {
 		fragmentRenderer = new FragmentRenderer(renderer);
 		this.width = width;
@@ -98,7 +99,11 @@ class FluidSimulation {
 		});
 
 		// use gamma decode when displaying the color texture (advection is still handled in linear-space)
-		colorTexture = new DualRenderTarget(renderer, width, height, textureOptions);
+		colorTexture = new DualRenderTarget(renderer, width, height, generateMipmaps ? extend(textureOptions, {
+			magFilter: TextureFilter.LinearFilter,
+			minFilter: TextureFilter.LinearMipMapLinearFilter,
+			generateMipmaps: true,
+		}) : textureOptions);
 		velocityTexture = new DualRenderTarget(renderer, simulationWidth, simulationHeight, textureOptions);
 		pressureTexture = new DualRenderTarget(renderer, simulationWidth, simulationHeight, textureOptionsNearest);
 		divergenceTexture = new WebGLRenderTarget(simulationWidth, simulationHeight, textureOptionsNearest);
@@ -235,9 +240,10 @@ class FluidSimulation {
 
 class Advect extends RawShaderMaterial {
 
-	public final target = new Uniform<Texture>(null);
+	public final target: Uniform<Texture>;
 
 	public function new(sharedUniforms) {
+		var target = new Uniform<Texture>(null);
 		super({
 			uniforms: extendAny(sharedUniforms, {
 				target: target,
@@ -266,6 +272,7 @@ class Advect extends RawShaderMaterial {
 				}
 			',
 		});
+		this.target = target;
 	}
 
 }

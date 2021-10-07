@@ -32,8 +32,8 @@ class CompLayer extends ClipSpaceTriangle<ShaderMaterial> {
 			depthWrite: true,
 			depthTest: true,
 		}, options);
-		uTexture = new Uniform(texture);
-		shaderMaterial = new ShaderMaterial({
+		var uTexture = new Uniform(texture);
+		var shaderMaterial = new ShaderMaterial({
 			uniforms: {
 				uTexture: uTexture,
 				uDepth: new Uniform(options.depth),
@@ -82,6 +82,8 @@ class CompLayer extends ClipSpaceTriangle<ShaderMaterial> {
 			shaderMaterial.blending = NoBlending;
 		}
 		super(shaderMaterial);
+		this.uTexture = uTexture;
+		this.shaderMaterial = shaderMaterial;
 	}
 
 }

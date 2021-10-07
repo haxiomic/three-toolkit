@@ -12,6 +12,8 @@ import three.ShaderMaterial;
 import three.WebGLRenderTarget;
 import three.WebGLRenderer;
 
+private typedef Object3D = three.Object3D<three.Event>;
+
 /**
 	**Uses the `WorldPosition` layer**
 	Make sure to enable `WorldPosition` on objects that should be rendered

@@ -27,16 +27,15 @@ class Blur1D extends RawShaderMaterial {
 
 	static final instances = new Map<String, Blur1D>();
 
-	public final uTexture = new Uniform(null);
-	public final uTexelSize = new Uniform(new Vector2(1,1));
+	public final uTexture: Uniform<Texture>;
+	public final uTexelSize: Uniform<Vector2>;
 	public final kernel: Float;
 	public final directionX: Float;
 	public final directionY: Float;
 
 	public function new(ctx: RenderingContext, kernel: Float, truncationSigma: Float, directionX: Float, directionY: Float, linearSampling: Bool) {
-		this.kernel = kernel;
-		this.directionX = directionX;
-		this.directionY = directionY;
+		var uTexture = new Uniform(null);
+		var uTexelSize = new Uniform(new Vector2(1,1));
 		var shaderParts = generateShaderParts(ctx, kernel, truncationSigma, directionX, directionY, linearSampling);
 		var precision = 'mediump';
 		super({
@@ -79,9 +78,15 @@ class Blur1D extends RawShaderMaterial {
 				}
 			',
 		});
+
+		this.uTexture = uTexture;
+		this.uTexelSize = uTexelSize;
+		this.kernel = kernel;
+		this.directionX = directionX;
+		this.directionY = directionY;
 	}
 
-	function generateShaderParts(ctx: RenderingContext, kernel: Float, truncationSigma: Float, directionX: Float, directionY: Float, linearSampling: Bool) {
+	static function generateShaderParts(ctx: RenderingContext, kernel: Float, truncationSigma: Float, directionX: Float, directionY: Float, linearSampling: Bool) {
 		// Generate sampling offsets and weights
 		var N = nearestBestKernel(kernel);
 

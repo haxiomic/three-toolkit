@@ -3,7 +3,6 @@ package rendering;
 import three.Vector2;
 import js.lib.Float32Array;
 import js.lib.Uint8Array;
-import shaders.Common;
 import three.Uniform;
 import three.PixelFormat;
 import three.WebGLRenderer;
@@ -41,7 +40,16 @@ class FloatTexturePacker {
 				uSource: uSource,
 				uRange: uRange,
 			},
-			vertexShader: Common.clipSpaceVertexShader,
+			vertexShader: '
+				attribute vec2 position;
+
+				varying vec2 vUv;
+
+				void main() {
+					vUv = position * 0.5 + 0.5;
+					gl_Position = vec4(position, 0., 1.);
+				}
+			',
 			fragmentShader: '
 				precision highp float;
 

@@ -1,11 +1,14 @@
 package tool;
 
-import three.MeshStandardMaterial;
-import three.Mesh;
 import three.Color;
-import three.MeshPhysicalMaterial;
-import three.SphereGeometry;
+import three.Mesh;
+import three.MeshStandardMaterial;
 import three.Object3D;
+import three.SphereGeometry;
+
+#if (three <= "0.133.0")
+private typedef Object3D = three.Object3D<three.Event>;
+#end
 
 class LightingDebugProbes extends Object3D {
 

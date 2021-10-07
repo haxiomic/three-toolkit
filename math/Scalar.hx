@@ -72,4 +72,12 @@ class Scalar {
 		return 1.0 - x*x*(3.0-2.0*x);
 	}
 
+	static public inline final LN2 = 0.6931471805599453;
+	static public inline function floorPowerOfTwo(x: Float) {
+		return Math.pow(2, Math.floor(Math.log(x) / LN2));
+	}
+	static public inline function ceilPowerOfTwo(x: Float) {
+		return Math.pow(2, Math.ceil(Math.log(x) / LN2));
+	}
+
 }

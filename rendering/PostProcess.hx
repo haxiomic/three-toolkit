@@ -1,10 +1,10 @@
 package rendering;
 
+import math.Scalar;
 import three.Blending;
 import three.BlendingDstFactor;
 import js.html.webgl.RenderingContext;
 import shaders.Blur1D;
-import three.MathUtils;
 import three.RawShaderMaterial;
 import three.Texture;
 import three.Uniform;
@@ -98,8 +98,8 @@ class PostProcess {
 			var w: Int;
 			var h: Int;
 			if (floorPowerOfTwo) {
-				w = Std.int(MathUtils.floorPowerOfTwo(source.width * 0.5));
-				h = Std.int(MathUtils.floorPowerOfTwo(source.height * 0.5));
+				w = Std.int(Scalar.floorPowerOfTwo(source.width * 0.5));
+				h = Std.int(Scalar.floorPowerOfTwo(source.height * 0.5));
 			} else {
 				w = Math.ceil(source.width * 0.5);
 				h = Math.ceil(source.height * 0.5);
@@ -121,8 +121,8 @@ class PostProcess {
 		var blurInput = source;
 
 		for (i in 0...downsampleIterations) {
-			var w = Std.int(MathUtils.floorPowerOfTwo(blurInput.width * 0.5));
-			var h = Std.int(MathUtils.floorPowerOfTwo(blurInput.height * 0.5));
+			var w = Std.int(Scalar.floorPowerOfTwo(blurInput.width * 0.5));
+			var h = Std.int(Scalar.floorPowerOfTwo(blurInput.height * 0.5));
 			blurInput = resize('blur.$i.$uid', blurInput, w, h);
 			if (w <= 1 && h <= 1) break;
 		}
@@ -157,10 +157,12 @@ class PostProcess {
 
 class CopyShader extends RawShaderMaterial {
 
-	final uTexture = new Uniform(null);
-	final uOpacity = new Uniform(null);
+	final uTexture: Uniform<Texture>;
+	final uOpacity: Uniform<Float>;
 
 	public function new() {
+		var uTexture = new Uniform<Texture>(null);
+		var uOpacity = new Uniform<Float>(1.);
 		super({
 			uniforms: {
 				uTexture: uTexture,
@@ -192,6 +194,9 @@ class CopyShader extends RawShaderMaterial {
 			toneMapped: false,
 			blending: NoBlending,
 		});
+
+		this.uTexture = uTexture;
+		this.uOpacity = uOpacity;
 	}
 
 	public function setParams(texture: Texture, opacity: Float) {
