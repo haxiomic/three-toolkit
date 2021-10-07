@@ -152,10 +152,11 @@ class PostProcess {
 		var blurXTarget = renderTargetStore.acquire('blurX.$uid', width, height, targetOptions);
 		var blurXYTarget = renderTargetStore.acquire('blurXY.$uid', width, height, targetOptions);
 
-		var scaledKernel = kernel * blurInput.width;
+		var scaledKernelX = kernel * blurInput.width;
+		var scaledKernelY = kernel * blurInput.height;
 		
-		fragmentRenderer.render(blurXTarget, Blur1D.get(gl, scaledKernel, sigma, 1., 0., blurInput, blurInput.width, blurInput.height));
-		fragmentRenderer.render(blurXYTarget, Blur1D.get(gl, scaledKernel, sigma, 0., 1., blurXTarget.texture, blurXTarget.width, blurXTarget.height));
+		fragmentRenderer.render(blurXTarget, Blur1D.get(gl, scaledKernelX, sigma, 1., 0., blurInput, blurInput.width, blurInput.height));
+		fragmentRenderer.render(blurXYTarget, Blur1D.get(gl, scaledKernelY, sigma, 0., 1., blurXTarget.texture, blurXTarget.width, blurXTarget.height));
 		
 		return blurXYTarget.texture;
 	}
