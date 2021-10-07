@@ -1,5 +1,7 @@
 package rendering;
 
+import three.WebGLMultisampleRenderTarget;
+import three.WebGLMultipleRenderTargets;
 import three.WebGLRenderTarget;
 import three.WebGLRenderTargetOptions;
 
@@ -15,7 +17,7 @@ abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
 
 		Content is undefined
 	**/
-	public function acquire(uid: String, width: Float, height: Float, options: WebGLRenderTargetOptions, alwaysSyncOptions: Bool = false): rendering.WebGLRenderTarget {
+	public function acquire(uid: String, width: Float, height: Float, options: WebGLRenderTargetOptions & { ?msaaSamples: Int }, alwaysSyncOptions: Bool = false): rendering.WebGLRenderTarget {
 		var target = this.get(uid);
 
 		var needsNew = target == null;
@@ -33,7 +35,8 @@ abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
 				(options.minFilter != null && target.texture.minFilter != options.minFilter) ||
 				(options.format != null && target.texture.format != options.format) ||
 				(options.type != null && target.texture.type != options.type) ||
-				(options.anisotropy != null && target.texture.anisotropy != options.anisotropy)
+				(options.anisotropy != null && target.texture.anisotropy != options.anisotropy) ||
+				(options.msaaSamples != null && (cast target: WebGLMultisampleRenderTarget).samples != options.msaaSamples)
 			);
 		}
 
@@ -41,7 +44,13 @@ abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
 			if (target != null) {
 				target.dispose();
 			}
-			target = new WebGLRenderTarget(width, height, options);			
+			target = if (options.msaaSamples > 0) {
+				var _ = new WebGLMultisampleRenderTarget(width, height, options);
+				_.samples = options.msaaSamples;
+				_;
+			} else {
+				new WebGLRenderTarget(width, height, options);
+			}
 			this.set(uid, target);
 		} else {
 			// synchronize props
