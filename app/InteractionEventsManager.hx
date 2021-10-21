@@ -1,6 +1,5 @@
 package app;
 
-import Main.canvas;
 import app.event.PointerEvent;
 import js.Browser.*;
 import js.html.Element;
@@ -152,8 +151,8 @@ class InteractionEventsManager {
 				y: mouseEvent.clientY,
 				width: 1,
 				height: 1,
-				viewWidth: canvas.clientWidth,
-				viewHeight: canvas.clientHeight,
+				viewWidth: el.clientWidth,
+				viewHeight: el.clientHeight,
 				pressure: pressure,
 				tangentialPressure: 0,
 				tiltX: 0,
@@ -247,8 +246,8 @@ class InteractionEventsManager {
 					y: touch.clientY,
 					width: radiusX * 2,
 					height: radiusY * 2,
-					viewWidth: canvas.clientWidth,
-					viewHeight: canvas.clientHeight,
+					viewWidth: el.clientWidth,
+					viewHeight: el.clientHeight,
 					pressure: touch.force,
 					tangentialPressure: 0,
 					tiltX: Math.isFinite(tiltX) ? tiltX : 0,
@@ -261,32 +260,32 @@ class InteractionEventsManager {
 		}
 
 		var onPointerDown = (e: PointerEvent) -> {
-			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
-			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			Reflect.setField(e, 'viewWidth', el.clientWidth);
+			Reflect.setField(e, 'viewHeight', el.clientHeight);
 			if (e.isPrimary) {
 				primaryPointer = e;
 			}
 			eventHandler.onPointerDown(e);
 		};
 		var onPointerMove = (e: PointerEvent) -> {
-			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
-			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			Reflect.setField(e, 'viewWidth', el.clientWidth);
+			Reflect.setField(e, 'viewHeight', el.clientHeight);
 			if (e.isPrimary) {
 				primaryPointer = e;
 			}
 			eventHandler.onPointerMove(e);
 		};
 		var onPointerUp = (e: PointerEvent) -> {
-			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
-			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			Reflect.setField(e, 'viewWidth', el.clientWidth);
+			Reflect.setField(e, 'viewHeight', el.clientHeight);
 			if (e.isPrimary) {
 				primaryPointer = null;
 			}
 			eventHandler.onPointerUp(e);
 		};
 		var onPointerCancel = (e: PointerEvent) -> {
-			Reflect.setField(e, 'viewWidth', canvas.clientWidth);
-			Reflect.setField(e, 'viewHeight', canvas.clientHeight);
+			Reflect.setField(e, 'viewWidth', el.clientWidth);
+			Reflect.setField(e, 'viewHeight', el.clientHeight);
 			if (e.isPrimary) {
 				primaryPointer = null;
 			}
