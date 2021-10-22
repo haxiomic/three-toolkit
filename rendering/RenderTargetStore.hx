@@ -1,7 +1,6 @@
 package rendering;
 
 import three.WebGLMultisampleRenderTarget;
-import three.WebGLMultipleRenderTargets;
 import three.WebGLRenderTarget;
 import three.WebGLRenderTargetOptions;
 
