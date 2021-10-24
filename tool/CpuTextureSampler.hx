@@ -2,16 +2,25 @@ package tool;
 
 import js.lib.Float32Array;
 
+enum abstract WrapMode(Int) {
+	var REPEAT;
+	var CLAMP;
+}
+
 class CpuTextureSampler {
 
-	final width: Int;
-	final height: Int;
-	final pixels: Float32Array;
+	public var width: Int;
+	public var height: Int;
+	public var pixels: Float32Array;
+	public var wrapS: WrapMode;
+	public var wrapT: WrapMode;
 
-	public function new(tightlyPackedPixels: Float32Array, width: Int, height: Int) {
+	public function new(tightlyPackedPixels: Float32Array, width: Int, height: Int, wrapS = CLAMP, wrapT = CLAMP) {
 		this.pixels = tightlyPackedPixels;
 		this.width = width;
 		this.height = height;
+		this.wrapS = wrapS;
+		this.wrapT = wrapT;
 	}
 
 	public function sampleLinear(uvX: Float, uvY: Float) {
@@ -45,8 +54,14 @@ class CpuTextureSampler {
 
 	public function getPixel(i: Int, j: Int) {
 		// repeat wrapping
-		i = Std.int(mod(i, width));
-		j = Std.int(mod(j, height));
+		i = switch wrapS {
+			case REPEAT: Std.int(mod(i, width));
+			case CLAMP: i < 0 ? 0 : (i >= width ? width - 1 : i);
+		}
+		j = switch wrapS {
+			case REPEAT: Std.int(mod(j, height));
+			case CLAMP: j < 0 ? 0 : (j >= height ? height - 1 : j);
+		}
 		return pixels[j * width + i];
 	}
 

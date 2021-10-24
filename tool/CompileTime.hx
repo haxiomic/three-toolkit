@@ -30,6 +30,25 @@ class CompileTime {
 		return macro $v{Base64.encode(File.getBytes(resolvedPath))};
 	}
 
+	static public macro function embedImageDataUri(path: String, ?mimeType: String) {
+		var resolvedPath =  resolvePath(path);
+		Context.registerModuleDependency(Context.getLocalModule(), resolvedPath);
+		if (mimeType == null) {
+			mimeType = switch Path.extension(path).toLowerCase() {
+				case 'bmp': 'image/bmp';
+				case 'gif': 'image/gif';
+				case 'ico': 'image/vnd.microsoft.icon';
+				case 'png': 'image/png';
+				case 'svg': 'image/svg+xml';
+				case 'webp': 'image/webp';
+				case 'jpeg', 'jpg': 'image/jpeg';
+				case 'tif', 'tiff': 'image/tiff';
+				default: 'image/xyz'; // let the browser figure it out
+			}
+		}
+		return macro 'data:image/' + $v{mimeType} + ';base64,' + $v{Base64.encode(File.getBytes(resolvedPath))};
+	}
+
 	static public macro function haxeVersion() {
 		return macro $v{Context.definedValue('haxe')};
 	}
