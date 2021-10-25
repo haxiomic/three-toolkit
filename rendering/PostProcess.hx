@@ -120,8 +120,8 @@ class PostProcess {
 	/**
 		Requires linear filtering on the source texture
 	**/
-	public function blur(uid: String, source: rendering.Texture, kernel: Float, sigma = 0.5, downsampleIterations: Int = 0) {
-		if (kernel == 0) {
+	public function blur(uid: String, source: rendering.Texture, kernel_yFraction: Float, sigma = 0.5, downsampleIterations: Int = 0) {
+		if (kernel_yFraction == 0) {
 			return source;
 		}
 
@@ -152,11 +152,12 @@ class PostProcess {
 		var blurXTarget = renderTargetStore.acquire('blurX.$uid', width, height, targetOptions);
 		var blurXYTarget = renderTargetStore.acquire('blurXY.$uid', width, height, targetOptions);
 
-		var scaledKernelX = kernel * blurInput.width;
-		var scaledKernelY = kernel * blurInput.height;
+		var aspect = source.width / source.height;
+		var kernelY_texels = kernel_yFraction * blurInput.height;
+		var kernelX_texels = kernel_yFraction * (1/aspect) * blurInput.width;
 		
-		fragmentRenderer.render(blurXTarget, Blur1D.get(gl, scaledKernelX, sigma, 1., 0., blurInput, blurInput.width, blurInput.height));
-		fragmentRenderer.render(blurXYTarget, Blur1D.get(gl, scaledKernelY, sigma, 0., 1., blurXTarget.texture, blurXTarget.width, blurXTarget.height));
+		fragmentRenderer.render(blurXTarget, Blur1D.get(gl, kernelX_texels, sigma, 1., 0., blurInput, blurInput.width, blurInput.height));
+		fragmentRenderer.render(blurXYTarget, Blur1D.get(gl, kernelY_texels, sigma, 0., 1., blurXTarget.texture, blurXTarget.width, blurXTarget.height));
 		
 		return blurXYTarget.texture;
 	}
