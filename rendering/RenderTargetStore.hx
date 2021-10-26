@@ -24,9 +24,9 @@ abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
 		// here options may change at runtime so we check if the options are correct and create a new target if mismatching
 		if (alwaysSyncOptions && !needsNew) {
 			needsNew = (
-				options.depthBuffer != target.depthBuffer ||
-				options.stencilBuffer != target.stencilBuffer ||
-				options.depthTexture != target.depthTexture
+				(options.depthBuffer != null && options.depthBuffer != target.depthBuffer) ||
+				(options.stencilBuffer != null && options.stencilBuffer != target.stencilBuffer) ||
+				(options.depthTexture != null && options.depthTexture != target.depthTexture)
 			) || (
 				(options.wrapS != null && target.texture.wrapS != options.wrapS) ||
 				(options.wrapT != null && target.texture.wrapT != options.wrapT) ||

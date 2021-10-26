@@ -58,6 +58,7 @@ class ArcBallControl {
 	public final angleAroundXZ = new Spring(0.);
 	public final radius = new Spring(1.);
 
+	public final target = new Vec3(0., 0., 0.);
 	public final position = new Vec3(0., 0., 0.);
 	public final orientation = new Quat(0, 0, 0, 1);
 
@@ -152,7 +153,7 @@ class ArcBallControl {
 		final position: {x: Float, y: Float, z: Float};
 		final quaternion: {x: Float, y: Float, z: Float, w: Float};
 	}) {
-		var p = position;
+		var p = position + target;
 		var q = orientation;
 		camera.position.x = p.x;
 		camera.position.y = p.y;
