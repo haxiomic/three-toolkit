@@ -71,7 +71,7 @@ class PostProcess {
 	var _blitBasicMaterial = new MeshBasicMaterial({color: 0xFFFFFF});
 	public function blitViaBasicMaterial(source: Texture, target: Null<WebGLRenderTarget>) {
 		_blitBasicMaterial.map = source;
-		this.fragmentRenderer.render(target, _blitBasicMaterial, 0xFF00FF);
+		this.fragmentRenderer.render(target, _blitBasicMaterial, 0x000000);
 	}
 
 	public function resize(uid: String, source: Texture, width: Float, height: Float): rendering.Texture {
@@ -118,13 +118,10 @@ class PostProcess {
 	}
 
 	/**
+		Returns a blurred copy of the source texture.
 		Requires linear filtering on the source texture
 	**/
 	public function blur(uid: String, source: rendering.Texture, kernel_yFraction: Float, sigma = 0.5, downsampleIterations: Int = 0) {
-		if (kernel_yFraction == 0) {
-			return source;
-		}
-
 		var blurInput = source;
 
 		for (i in 0...downsampleIterations) {
@@ -134,31 +131,47 @@ class PostProcess {
 			if (w <= 1 && h <= 1) break;
 		}
 
+		return inline blurInternal(uid, blurInput, kernel_yFraction, sigma, null);
+	}
+
+	/**
+		Blurs the source render target, modifying it in the process.
+		Requires linear filtering on the source texture
+	**/
+	public function blurSelf(uid: String, source: WebGLRenderTarget, kernel_yFraction: Float, sigma = 0.5) {
+		return inline blurInternal(uid, source.texture, kernel_yFraction, sigma, source);
+	}
+
+	function blurInternal(uid: String, blurInput: rendering.Texture, kernel_yFraction: Float, sigma: Float, outputTarget: Null<WebGLRenderTarget>) {
+		if (kernel_yFraction == 0) {
+			return blurInput;
+		}
+
 		var width = blurInput.width;
 		var height = blurInput.height;
 
 		var targetOptions = {
-			wrapS: source.wrapS,
-			wrapT: source.wrapT,
-			encoding: source.encoding,
-			generateMipmaps: source.generateMipmaps,
-			anisotropy: source.anisotropy,
-			type: source.type,
-			format: source.format,
-			minFilter: source.minFilter,
-			magFilter: source.magFilter,
+			wrapS: blurInput.wrapS,
+			wrapT: blurInput.wrapT,
+			encoding: blurInput.encoding,
+			generateMipmaps: blurInput.generateMipmaps,
+			anisotropy: blurInput.anisotropy,
+			type: blurInput.type,
+			format: blurInput.format,
+			minFilter: blurInput.minFilter,
+			magFilter: blurInput.magFilter,
 		};
 
 		var blurXTarget = renderTargetStore.acquire('blurX.$uid', width, height, targetOptions);
-		var blurXYTarget = renderTargetStore.acquire('blurXY.$uid', width, height, targetOptions);
+		var blurXYTarget = outputTarget != null ? outputTarget : renderTargetStore.acquire('blurXY.$uid', width, height, targetOptions);
 
-		var aspect = source.width / source.height;
+		var aspect = blurInput.width / blurInput.height;
 		var kernelY_texels = kernel_yFraction * blurInput.height;
 		var kernelX_texels = kernel_yFraction * (1/aspect) * blurInput.width;
-		
-		fragmentRenderer.render(blurXTarget, Blur1D.get(gl, kernelX_texels, sigma, 1., 0., blurInput, blurInput.width, blurInput.height));
-		fragmentRenderer.render(blurXYTarget, Blur1D.get(gl, kernelY_texels, sigma, 0., 1., blurXTarget.texture, blurXTarget.width, blurXTarget.height));
-		
+
+		fragmentRenderer.render(blurXTarget, Blur1D.get(gl, kernelX_texels, sigma, 1., 0., blurInput, blurInput.width, blurInput.height), 0x0);
+		fragmentRenderer.render(blurXYTarget, Blur1D.get(gl, kernelY_texels, sigma, 0., 1., blurXTarget.texture, blurXTarget.width, blurXTarget.height), 0x0);
+
 		return blurXYTarget.texture;
 	}
 	

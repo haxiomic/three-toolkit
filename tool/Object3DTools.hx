@@ -16,7 +16,6 @@ class Object3DTools {
 	static public function iterate(obj: Object3D, cb: Object3D -> Void) {
 		cb(obj);
 		for (child in obj.children) {
-			cb(child);
 			iterate(child, cb);
 		}
 	}
@@ -73,6 +72,16 @@ class Object3DTools {
 			result = result.concat(a);
 		}
 		return result;
+	}
+
+	static public function getAllMaterials(obj: Object3D) {
+		var materials = new Array();
+		iterateMeshes(obj, mesh -> {
+			if (mesh.material != null && materials.indexOf(mesh.material) == -1) {
+				materials.push(mesh.material);
+			}
+		});
+		return materials;
 	}
 
 }

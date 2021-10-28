@@ -46,7 +46,8 @@ class FragmentRenderer {
 
 		if (clearColor != null) {
 			renderer.setClearColor(clearColor);
-			renderer.clear(true, false, false);
+			// clearing the depth is important here, just in case the target has a depth buffer
+			renderer.clear(true, true, true);
 		}
 
 		renderer.render(rttScene, rttCamera);

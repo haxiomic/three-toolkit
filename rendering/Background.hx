@@ -27,7 +27,8 @@ class Background extends Mesh<BufferGeometry, EnvironmentMaterial> {
 
 		geometry.deleteAttribute('normal');
 		geometry.deleteAttribute('uv');
-
+		
+		this.name = 'Background';
 		this.frustumCulled = false;
 		this.castShadow = false;
 		this.receiveShadow = false;
