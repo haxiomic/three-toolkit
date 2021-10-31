@@ -57,28 +57,40 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 	@:keep public final isMeshStandardMaterial: Bool;
 
 	// MeshPhysicalMaterial
-	@:keep public var clearcoat: Float;
+	@:keep public var clearcoat(default, set): Float;
 	@:keep public var clearcoatMap: Null<Texture>;
 	@:keep public var clearcoatRoughness: Float;
 	@:keep public var clearcoatRoughnessMap: Null<Texture>;
 	@:keep public var clearcoatNormalScale: Vector2;
 	@:keep public var clearcoatNormalMap: Null<Texture>;
 
-	@:keep public var reflectivity: Float;
+	@:isVar
+	@:keep public var reflectivity (get, set): Float;
 
-	@:keep public var sheen: Null<Float>;
+	@:keep public var sheen (default, set): Null<Float>;
 
 	@:keep public var transparency: Float;
 
-	@:keep public var transmission: Float;
+	@:keep public var transmission(default, set): Float;
 	@:keep public var ior: Float;
+
+	@:keep public var transmissionMap: Null<Texture>;
+	@:keep public var thickness: Float;
+	@:keep public var thicknessMap: Null<Texture>;
+	@:keep public var attenuationDistance: Float;
+	@:keep public var attenuationTint: Color;
+
+	@:keep public var specularIntensity : Float;
+	@:keep public var specularTint : Color;
+	@:keep public var specularIntensityMap : Null<Texture>;
+	@:keep public var specularTintMap : Null<Texture>;
 
 	@:keep public final isMeshPhysicalMaterial: Bool;
 
 
 	public function new(
-		additionalUniforms: haxe.DynamicAccess<three.Uniform<Any>>,
-		parameters: ShaderMaterialParameters & MeshPhysicalMaterialParameters & {
+		?additionalUniforms: haxe.DynamicAccess<three.Uniform<Any>>,
+		?parameters: ShaderMaterialParameters & MeshPhysicalMaterialParameters & {
 			?transparency: Float, // missing from type definitions
 			?defaultAttributeValues: haxe.DynamicAccess<Array<Float>>, // missing from type definitions
 		}
@@ -88,11 +100,11 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 				'STANDARD': '',
 				'PHYSICAL': '',
 			},
-			uniforms: extendAny(Three.ShaderLib.physical.uniforms, additionalUniforms),
+			uniforms: extendAny(Three.ShaderLib.physical.uniforms, additionalUniforms != null ? additionalUniforms : {}),
 			vertexShader: Three.ShaderLib.physical.vertexShader,
 			fragmentShader: Three.ShaderLib.physical.fragmentShader,
-			fog: true,			
-		}, parameters));
+			fog: true,
+		}, parameters != null ? parameters : {}));
 
 		this.color = new Color( 0xffffff ); // diffuse
 		this.roughness = 1.0;
@@ -129,12 +141,56 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 		this.clearcoatRoughnessMap = null;
 		this.clearcoatNormalScale = new Vector2( 1, 1 );
 		this.clearcoatNormalMap = null;
-		this.reflectivity = 0.5; // maps to F0 = 0.04
+		// this.reflectivity = 0.5; // maps to F0 = 0.04
 		this.sheen = null; // null will disable sheen bsdf
 		this.transparency = 0.0;
 		this.transmission = 0.;
-		this.ior = 1.3;
+		this.ior = 1.5;
+
+		this.transmissionMap = null;
+
+		this.thickness = 0.01;
+		this.thicknessMap = null;
+		this.attenuationDistance = 0.0;
+		this.attenuationTint = new Color( 1, 1, 1 );
+
+		this.specularIntensity = 1.0;
+		this.specularTint = new Color(1, 1, 1);
+		this.specularIntensityMap = null;
+		this.specularTintMap = null;
+		
 		this.isMeshPhysicalMaterial = true;
+
+		if (parameters != null) {
+			this.setValues(parameters);
+		} 
+	}
+
+	inline function set_sheen(v: Float) {
+		if ((this.sheen > 0) != (v > 0)) this.version++;
+		return this.sheen = v;
+	}
+
+	inline function set_clearcoat(v: Float) {
+		if ((this.clearcoat > 0) != (v > 0)) this.version++;
+		return this.clearcoat = v;
+	}
+
+	inline function set_transmission(v: Float) {
+		if ((this.transmission > 0) != (v > 0)) this.version++;
+		return this.transmission = v;
+	}
+	
+	inline function get_reflectivity() {
+		return clamp(2.5 * ( this.ior - 1 ) / ( this.ior + 1 ), 0, 1);
+	}
+	inline function set_reflectivity(v: Float) {
+		this.reflectivity = v;
+		return this.ior = ( 1 + 0.4 * v ) / ( 1 - 0.4 * v );
+	}
+
+	private inline function clamp(v: Float, min: Float, max: Float) {
+		return v < min ? min : (v > max ? max : v);
 	}
 
 }
