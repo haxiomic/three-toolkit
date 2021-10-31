@@ -71,6 +71,8 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 	@:keep public var reflectivity (get, set): Float;
 
 	@:keep public var sheen (default, set): Null<Float>;
+	@:keep public var sheenTint: Color;
+	@:keep public var sheenRoughness: Float;
 
 	@:keep public var transparency: Float;
 
@@ -146,7 +148,9 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 		this.clearcoatNormalScale = new Vector2( 1, 1 );
 		this.clearcoatNormalMap = null;
 		// this.reflectivity = 0.5; // maps to F0 = 0.04
-		this.sheen = null; // null will disable sheen bsdf
+		this.sheen = 0.0; // null will disable sheen bsdf
+		this.sheenTint = new Color(0x0);
+		this.sheenRoughness = 1.0;
 		this.transparency = 0.0;
 		this.transmission = 0.;
 		this.ior = 1.5;
