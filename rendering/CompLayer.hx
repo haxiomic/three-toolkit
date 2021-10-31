@@ -1,7 +1,7 @@
 package rendering;
 
 import Structure.extend;
-import mesh.ClipSpaceTriangle;
+import objects.ClipSpaceTriangle;
 import three.BlendingDstFactor;
 import three.ShaderMaterial;
 import three.Side;

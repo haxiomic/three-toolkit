@@ -2,7 +2,7 @@ package rendering;
 
 import three.Material;
 import three.RawShaderMaterial;
-import mesh.ClipSpaceTriangle;
+import objects.ClipSpaceTriangle;
 import three.OrthographicCamera;
 import three.Scene;
 import three.ShaderMaterial;
