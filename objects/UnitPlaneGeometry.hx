@@ -1,6 +1,8 @@
-package mesh;
+package objects;
 
-class UnitPlaneGeometry extends three.PlaneBufferGeometry {
+import three.PlaneGeometry;
+
+class UnitPlaneGeometry extends three.PlaneGeometry {
 
 	public function new() {
 		super(1, 1, 1, 1);

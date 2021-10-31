@@ -1,4 +1,4 @@
-package mesh;
+package objects;
 
 import three.Material;
 import three.BufferAttribute;
@@ -6,9 +6,9 @@ import js.lib.Float32Array;
 import three.BufferGeometry;
 import three.Mesh;
 
-class UVTriangle extends Mesh<BufferGeometry, Material> {
+class ClipSpaceTriangle<T: Material> extends Mesh<BufferGeometry, T> {
 
-	public function new(material: Null<Material>) {
+	public function new(material: Null<T>) {
 		super(globalGeom, material);
 		this.frustumCulled = false;
 		this.castShadow = false;
@@ -18,11 +18,13 @@ class UVTriangle extends Mesh<BufferGeometry, Material> {
 	static final globalGeom: BufferGeometry = {
 		var buffer = new BufferGeometry();
 		var triangle = new Float32Array([
-			0, 0,
-			2, 0,
-			0, 2,
+			-1, -1,
+			 3, -1,
+			-1,  3,
 		]);
+		var uv = new Float32Array(triangle.map(v -> v * 0.5 + 0.5));
 		buffer.setAttribute('position', new BufferAttribute(triangle, 2));
+		buffer.setAttribute('uv', new BufferAttribute(uv, 2));
 
 		buffer;
 	};

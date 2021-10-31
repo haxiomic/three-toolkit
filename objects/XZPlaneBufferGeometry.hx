@@ -1,4 +1,4 @@
-package mesh;
+package objects;
 
 import three.Float32BufferAttribute;
 import three.BufferAttribute;
