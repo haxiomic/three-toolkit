@@ -52,6 +52,9 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 	@:keep public var wireframeLinecap: String;
 	@:keep public var wireframeLinejoin: String;
 
+	#if (three >= "0.133.0")
+	@:deprecated("vertex tangents have been removed")
+	#end
 	@:keep public var vertexTangents: Bool;
 
 	@:keep public final isMeshStandardMaterial: Bool;
@@ -86,7 +89,6 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 	@:keep public var specularTintMap : Null<Texture>;
 
 	@:keep public final isMeshPhysicalMaterial: Bool;
-
 
 	public function new(
 		?additionalUniforms: haxe.DynamicAccess<three.Uniform<Any>>,
@@ -133,7 +135,9 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 		this.refractionRatio = 0.98;
 		this.wireframeLinecap = 'round';
 		this.wireframeLinejoin = 'round';
+		#if (three < "0.133.0")
 		this.vertexTangents = false;
+		#end
 		this.isMeshStandardMaterial = true;
 		this.clearcoat = 0.0;
 		this.clearcoatMap = null;
