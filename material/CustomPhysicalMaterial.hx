@@ -30,7 +30,7 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 	@:keep public var bumpMap: Null<Texture>;
 	@:keep public var bumpScale: Float;
 
-	@:keep public var normalMa: Null<Texture>;
+	@:keep public var normalMap: Null<Texture>;
 	@:keep public var normalMapType: NormalMapTypes;
 	@:keep public var normalScale: Vector2;
 
@@ -123,7 +123,7 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 		this.emissiveMap = null;
 		this.bumpMap = null;
 		this.bumpScale = 1;
-		this.normalMa = null;
+		this.normalMap = null;
 		this.normalMapType = TangentSpaceNormalMap;
 		this.normalScale = new Vector2( 1, 1 );
 		this.displacementMap = null;
