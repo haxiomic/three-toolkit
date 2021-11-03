@@ -4,7 +4,7 @@ import three.BufferGeometry;
 import three.Material;
 import three.Mesh;
 
-#if (three <= "0.133.0")
+#if (three >= "0.133.0")
 private typedef Object3D = three.Object3D<three.Event>;
 #end
 

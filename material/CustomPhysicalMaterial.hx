@@ -9,6 +9,11 @@ import three.ShaderMaterial;
 import three.ShaderMaterialParameters;
 import three.Vector2;
 
+typedef CustomPhysicalMaterialParameters = ShaderMaterialParameters & MeshPhysicalMaterialParameters & {
+	?transparency: Float, // missing from type definitions
+	?defaultAttributeValues: haxe.DynamicAccess<Array<Float>>, // missing from type definitions
+}
+
 class CustomPhysicalMaterial extends ShaderMaterial {
 
 	@:keep public var color: Color;
@@ -94,10 +99,7 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 
 	public function new(
 		?additionalUniforms: haxe.DynamicAccess<three.Uniform<Any>>,
-		?parameters: ShaderMaterialParameters & MeshPhysicalMaterialParameters & {
-			?transparency: Float, // missing from type definitions
-			?defaultAttributeValues: haxe.DynamicAccess<Array<Float>>, // missing from type definitions
-		}
+		?parameters: CustomPhysicalMaterialParameters
 	) {
 		super(extendAny({
 			defines: {

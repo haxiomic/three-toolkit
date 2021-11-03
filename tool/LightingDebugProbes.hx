@@ -6,7 +6,7 @@ import three.MeshStandardMaterial;
 import three.Object3D;
 import three.SphereGeometry;
 
-#if (three <= "0.133.0")
+#if (three >= "0.133.0")
 private typedef Object3D = three.Object3D<three.Event>;
 #end
 

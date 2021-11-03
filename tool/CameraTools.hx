@@ -5,7 +5,7 @@ import three.Box3;
 import three.Object3D;
 import three.OrthographicCamera;
 
-#if (three <= "0.133.0")
+#if (three >= "0.133.0")
 private typedef Object3D = three.Object3D<three.Event>;
 #end
 

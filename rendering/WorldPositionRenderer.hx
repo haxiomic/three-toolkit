@@ -12,7 +12,9 @@ import three.ShaderMaterial;
 import three.WebGLRenderTarget;
 import three.WebGLRenderer;
 
+#if (three >= "0.133.0")
 private typedef Object3D = three.Object3D<three.Event>;
+#end
 
 /**
 	**Uses the `WorldPosition` layer**
