@@ -69,9 +69,9 @@ class PostProcess {
 	}
 
 	var _blitBasicMaterial = new MeshBasicMaterial({color: 0xFFFFFF});
-	public function blitViaBasicMaterial(source: Texture, target: Null<WebGLRenderTarget>) {
+	public function blitViaBasicMaterial(source: Texture, target: Null<WebGLRenderTarget>, ?viewport: Vector4) {
 		_blitBasicMaterial.map = source;
-		this.fragmentRenderer.render(target, _blitBasicMaterial, 0x000000);
+		this.fragmentRenderer.render(target, _blitBasicMaterial, 0x000000, viewport);
 	}
 
 	public function resize(uid: String, source: Texture, width: Float, height: Float): rendering.Texture {
