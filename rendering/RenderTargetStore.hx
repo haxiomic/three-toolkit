@@ -1,14 +1,22 @@
 package rendering;
 
+import js.html.webgl.WebGL2RenderingContext;
 import three.WebGLMultisampleRenderTarget;
 import three.WebGLRenderTarget;
 import three.WebGLRenderTargetOptions;
+import three.WebGLRenderer;
 
-@:forward(get, exists, iterator, keyValueIterator)
-abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
+class RenderTargetStore {
 
-	public inline function new() {
-		this = new Map();
+	final map: Map<String, WebGLRenderTarget>;
+	final renderer: WebGLRenderer;
+	final maxMsaaSamples: Int;
+
+	public function new(renderer: WebGLRenderer) {
+		this.renderer = renderer;
+		this.map = new Map();
+		var gl = renderer.getContext();
+		this.maxMsaaSamples = renderer.capabilities.isWebGL2 ? gl.getParameter(WebGL2RenderingContext.MAX_SAMPLES) : 0;
 	}
 	
 	/**
@@ -17,9 +25,11 @@ abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
 		Content is undefined
 	**/
 	public function acquire(uid: String, width: Float, height: Float, options: WebGLRenderTargetOptions & { ?msaaSamples: Int }, alwaysSyncOptions: Bool = false): rendering.WebGLRenderTarget {
-		var target = this.get(uid);
+		var target = this.map.get(uid);
 
 		var needsNew = target == null;
+
+		var msaaSamples = Math.min(maxMsaaSamples, options.msaaSamples != null ? options.msaaSamples : 0);
 
 		// here options may change at runtime so we check if the options are correct and create a new target if mismatching
 		if (alwaysSyncOptions && !needsNew) {
@@ -35,7 +45,7 @@ abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
 				(options.format != null && target.texture.format != options.format) ||
 				(options.type != null && target.texture.type != options.type) ||
 				(options.anisotropy != null && target.texture.anisotropy != options.anisotropy) ||
-				(options.msaaSamples != null && (cast target: WebGLMultisampleRenderTarget).samples != options.msaaSamples)
+				((cast target: WebGLMultisampleRenderTarget).samples != msaaSamples)
 			);
 		}
 
@@ -43,14 +53,14 @@ abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
 			if (target != null) {
 				target.dispose();
 			}
-			target = if (options.msaaSamples > 0) {
+			target = if (msaaSamples > 0) {
 				var _ = new WebGLMultisampleRenderTarget(width, height, options);
-				_.samples = options.msaaSamples;
+				_.samples = msaaSamples;
 				_;
 			} else {
 				new WebGLRenderTarget(width, height, options);
 			}
-			this.set(uid, target);
+			this.map.set(uid, target);
 		} else {
 			// synchronize props
 			target.texture.generateMipmaps = options.generateMipmaps;
@@ -66,10 +76,17 @@ abstract RenderTargetStore(Map<String, WebGLRenderTarget>) {
 	}
 
 	public function clearAndDispose() {
-		for (target in this) {
+		for (target in this.map) {
 			target.dispose();
 		}
-		this.clear();
+		this.map.clear();
 	}
+	
+	public inline function get(uid: String) return this.map.get(uid);
+
+	public inline function exists(uid: String) return this.map.exists(uid);
+
+	public inline function iterator() return this.map.iterator();
+	public inline function keyValueIterator() return this.map.keyValueIterator();
 
 }

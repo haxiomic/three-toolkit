@@ -24,7 +24,7 @@ class PostProcess {
 		this.renderer = renderer;
 		this.gl = renderer.getContext();
 		this.fragmentRenderer = new FragmentRenderer(renderer);
-		this.renderTargetStore = new RenderTargetStore();
+		this.renderTargetStore = new RenderTargetStore(renderer);
 	}
 
 	public function dispose() {
