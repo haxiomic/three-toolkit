@@ -46,7 +46,7 @@ class FluidSimulation {
 	public var width(default, null): Int;
 	public var height(default, null): Int;
 	public var periodicBoundary(get, set): Bool;
-	final simulationTextureScale: Float;
+	public var simulationTextureScale: Float;
 	var simulationWidth: Int;
 	var simulationHeight: Int;
 
@@ -135,6 +135,11 @@ class FluidSimulation {
 		applyForces: (velocityTarget: WebGLRenderTarget) -> Void,
 		applyColor: (colorTarget: WebGLRenderTarget) -> Void
 	) {
+		// resize simulation textures if required
+		if (this.simulationWidth != Std.int(this.width * simulationTextureScale)) {
+			resize(width, height);
+		} 
+
 		sharedUniforms.dt.value = dt_s;
 		// simulation domain
 		var simulationWidth = velocityTexture.width;
