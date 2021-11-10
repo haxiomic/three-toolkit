@@ -1,5 +1,6 @@
 package rendering;
 
+import shaders.BloomBlend;
 import three.MeshBasicMaterial;
 import math.Scalar;
 import three.Blending;
@@ -31,7 +32,7 @@ class PostProcess {
 		this.renderTargetStore.clearAndDispose();
 	}
 
-	var _blit_viewport = new Vector4();
+	final _blit_viewport = new Vector4();
 	public inline function blit(
 		source: Texture,
 		target: Null<WebGLRenderTarget>,
@@ -68,10 +69,34 @@ class PostProcess {
  		this.fragmentRenderer.render(target, copyShader, options.clearColor, options.viewport);
 	}
 
-	var _blitBasicMaterial = new MeshBasicMaterial({color: 0xFFFFFF});
+	final _blitBasicMaterial = new MeshBasicMaterial({color: 0xFFFFFF});
 	public function blitViaBasicMaterial(source: Texture, target: Null<WebGLRenderTarget>, ?viewport: Vector4) {
 		_blitBasicMaterial.map = source;
 		this.fragmentRenderer.render(target, _blitBasicMaterial, 0x000000, viewport);
+	}
+
+	final bloomBlendMaterial = new BloomBlend();
+	public inline function bloomBlend(blurredSource: Texture, target: Null<WebGLRenderTarget>, options: {
+		/** Setting to 0 gives additive blending, setting to 1.0 is full replace **/
+		mix: Float,
+		multiplier: Float,
+		exponent: Float,
+		subtract: Float,
+	}) {
+		bloomBlendMaterial.uBloomMix.value = Math.pow(options.mix, 1.0 / renderer.gammaFactor);
+		bloomBlendMaterial.uBloomMultiplier.value = options.multiplier;
+		bloomBlendMaterial.uBloomExponent.value = options.exponent;
+		bloomBlendMaterial.uBloomSubtract.value = options.subtract;
+		bloomBlendMaterial.uTexture.value = blurredSource;
+
+		var viewport = if (target != null) {
+			target.viewport;
+		} else {
+			// drawing to canvas
+			_blit_viewport.set(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+		}
+
+		fragmentRenderer.render(target, bloomBlendMaterial, null, viewport);
 	}
 
 	public function resize(uid: String, source: Texture, width: Float, height: Float): rendering.Texture {

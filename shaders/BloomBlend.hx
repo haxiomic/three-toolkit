@@ -1,32 +1,32 @@
 package shaders;
 
+import three.BlendingDstFactor;
 import three.RawShaderMaterial;
 import three.Texture;
 import three.Uniform;
 
 class BloomBlend extends RawShaderMaterial {
 
-	static public inline function get(texture: Texture, alpha: Float, exponent: Float) {
-		instance.uTexture.value = texture;
-		instance.uBoomAlpha.value = alpha;
-		instance.uBoomExponent.value = exponent;
-		return instance;
-	}
-	static final instance = new BloomBlend();
-
 	public final uTexture: Uniform<Texture>;
-	public final uBoomAlpha: Uniform<Float>;
-	public final uBoomExponent: Uniform<Float>;
+	/** Setting to 0 gives additive blending, setting to 1.0 is full replace **/
+	public final uBloomMix: Uniform<Float>;
+	public final uBloomMultiplier: Uniform<Float>;
+	public final uBloomSubtract: Uniform<Float>;
+	public final uBloomExponent: Uniform<Float>;
 
 	public function new() {
 		var uTexture = new Uniform(cast null);
-		var uBoomAlpha = new Uniform(0.1);
-		var uBoomExponent = new Uniform(1.);
+		var uBloomMix = new Uniform(0.0);
+		var uBloomMultiplier = new Uniform(1.);
+		var uBloomSubtract = new Uniform(0.0);
+		var uBloomExponent = new Uniform(1.);
 		super({
 			uniforms: {
 				uTexture: uTexture,
-				uBoomAlpha: uBoomAlpha,
-				uBoomExponent: uBoomExponent, 
+				uBloomMix: uBloomMix,
+				uBloomMultiplier: uBloomMultiplier,
+				uBloomSubtract: uBloomSubtract,
+				uBloomExponent: uBloomExponent, 
 			},
 			vertexShader: '
 				attribute vec2 position;
@@ -42,24 +42,35 @@ class BloomBlend extends RawShaderMaterial {
 				precision highp float;
 
 				uniform sampler2D uTexture;
-				uniform float uBoomAlpha;
-				uniform float uBoomExponent;
+				uniform float uBloomMix;
+				uniform float uBloomMultiplier;
+				uniform float uBloomSubtract;
+				uniform float uBloomExponent;
 
 				varying vec2 vUv;
 
 				void main() {
 					gl_FragColor = texture2D(uTexture, vUv);
-					gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(uBoomExponent));
-					gl_FragColor.a *= uBoomAlpha;
+					gl_FragColor.rgb = max(gl_FragColor.rgb - uBloomSubtract, vec3(0.));
+					gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(uBloomExponent)) * uBloomMultiplier;
+					gl_FragColor.a *= uBloomMix;
 				}
 			',
 			side: DoubleSide,
-			blending: AdditiveBlending,
+
+			// color = src + dst * (1.0 - src.a)
+			blending: CustomBlending,
+			blendEquation: AddEquation,
+			blendSrc: BlendingDstFactor.OneFactor,
+			blendDst: BlendingDstFactor.OneMinusSrcAlphaFactor,
+			
 		});
 
 		this.uTexture = uTexture;
-		this.uBoomAlpha = uBoomAlpha;
-		this.uBoomExponent = uBoomExponent;
+		this.uBloomMix = uBloomMix;
+		this.uBloomMultiplier = uBloomMultiplier;
+		this.uBloomSubtract = uBloomSubtract;
+		this.uBloomExponent = uBloomExponent;
 	}
 
 }
