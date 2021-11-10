@@ -96,6 +96,7 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 	@:keep public var specularTintMap : Null<Texture>;
 
 	@:keep public final isMeshPhysicalMaterial: Bool;
+	@:keep public final isInitialized: Bool;
 
 	public function new(
 		?additionalUniforms: haxe.DynamicAccess<three.Uniform<Any>>,
@@ -170,10 +171,22 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 		this.specularTintMap = null;
 		
 		this.isMeshPhysicalMaterial = true;
+		this.isInitialized = true;
 
 		if (parameters != null) {
 			this.setValues(parameters);
 		} 
+	}
+
+	override function setValues(parameters:ShaderMaterialParameters) {
+		// fix "is not a property of this material" by defining null values initially
+		if (!isInitialized) {
+			for (key in Reflect.fields(parameters)) {
+				Reflect.setField(this, key, null);
+			}
+		}
+	
+		super.setValues(parameters);
 	}
 
 	inline function set_sheen(v: Float) {
