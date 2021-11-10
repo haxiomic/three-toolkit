@@ -17,13 +17,11 @@ import three.Group;
 **/
 class Background extends Mesh<BufferGeometry, EnvironmentMaterial> {
 
-	public final environmentMaterial: EnvironmentMaterial;
 	public var roughness(get, set): Float;
+	public var multiplier(get, set): Float;
 
 	public function new(roughness: Float = 0.5) {
-		var environmentMaterial = new EnvironmentMaterial(roughness);
-		super(new three.BoxGeometry(1, 1, 1), environmentMaterial);
-		this.environmentMaterial = environmentMaterial;
+		super(new three.BoxGeometry(1, 1, 1), new EnvironmentMaterial(roughness));
 
 		geometry.deleteAttribute('normal');
 		geometry.deleteAttribute('uv');
@@ -36,16 +34,23 @@ class Background extends Mesh<BufferGeometry, EnvironmentMaterial> {
 		this.renderOrder = Math.NEGATIVE_INFINITY; // render last to take advantage of depth culling
 
 		this.onBeforeRender = (renderer:WebGLRenderer, scene:Scene, camera:Camera, geometry:ts.AnyOf2<BufferGeometry, BufferGeometry>, material:Material, group:Group) -> {
-			environmentMaterial.envMap = scene.environment;
+			this.material.envMap = scene.environment;
 			this.matrixWorld.copyPosition(camera.matrixWorld);
 		};
 	}
 
 	inline function get_roughness() {
-		return this.environmentMaterial.uRoughness.value;
+		return this.material.uRoughness.value;
 	}
 	inline function set_roughness(v: Float) {
-		return this.environmentMaterial.uRoughness.value = v;
+		return this.material.uRoughness.value = v;
+	}
+
+	inline function get_multiplier() {
+		return this.material.uMultiplier.value;
+	}
+	inline function set_multiplier(v: Float) {
+		return this.material.uMultiplier.value = v;
 	}
 
 }
@@ -54,25 +59,29 @@ class EnvironmentMaterial extends ShaderMaterial {
 
 	@:isVar public var envMap(get, set): Null<Texture>;
 	public final uRoughness: Uniform<Float>;
+	public final uFlipEnvMap: Uniform<Int>;
+	public final uMultiplier: Uniform<Float>;
 
-	final uFlipEnvMap: Uniform<Int>;
 	final uEnvMap: Uniform<Texture>;
 
 	public function new(roughness: Float) {
 		final uRoughness = new Uniform(0.5);
 		final uFlipEnvMap = new Uniform(-1);
 		final uEnvMap = new Uniform(null);
+		final uMultiplier = new Uniform(1.);
 
 		super({
 			uniforms: {
 				'envMap': uEnvMap,
 				'flipEnvMap': uFlipEnvMap,
 				'uRoughness': uRoughness,
+				'uMultiplier': uMultiplier,
 			},
 			vertexShader: Three.ShaderLib.cube.vertexShader,
 			fragmentShader: 
 			'
 				uniform float uRoughness;
+				uniform float uMultiplier;
 				#include <envmap_common_pars_fragment>
 				#ifdef USE_ENVMAP
 				varying vec3 vWorldDirection;
@@ -107,6 +116,7 @@ class EnvironmentMaterial extends ShaderMaterial {
 					#else
 						gl_FragColor = vec4(1., 1., 1., 1.);
 					#endif
+					gl_FragColor.rgb *= uMultiplier;
 					#include <tonemapping_fragment>
 					#include <encodings_fragment>
 				}
@@ -120,6 +130,7 @@ class EnvironmentMaterial extends ShaderMaterial {
 		this.uRoughness = uRoughness;
 		this.uFlipEnvMap = uFlipEnvMap;
 		this.uEnvMap = uEnvMap;
+		this.uMultiplier = uMultiplier;
 
 		uRoughness.value = roughness;
 	}
