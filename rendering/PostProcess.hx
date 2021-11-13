@@ -72,6 +72,14 @@ class PostProcess {
 	final _blitBasicMaterial = new MeshBasicMaterial({color: 0xFFFFFF});
 	public function blitViaBasicMaterial(source: Texture, target: Null<WebGLRenderTarget>, ?viewport: Vector4) {
 		_blitBasicMaterial.map = source;
+		var viewport = if (viewport != null) viewport else {
+			if (target != null) {
+			target.viewport;
+			} else {
+				// drawing to canvas
+				_blit_viewport.set(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+			}
+		}
 		this.fragmentRenderer.render(target, _blitBasicMaterial, 0x000000, viewport);
 	}
 

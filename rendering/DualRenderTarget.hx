@@ -58,6 +58,14 @@ class DualRenderTarget {
 		uniform.value = b.texture;
 	}
 
+	public inline function getWriteRenderTarget() {
+		return a;
+	}
+
+	public inline function getReadRenderTarget() {
+		return b;
+	}
+
 	public inline function getRenderTarget() {
 		return a;
 	}
