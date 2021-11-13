@@ -15,7 +15,7 @@ import three.Group;
 	Draws the scene's environment texture with variable roughness
 	In contrast to scene.background which has fixed roughness
 **/
-class Background extends Mesh<BufferGeometry, EnvironmentMaterial> {
+class BackgroundEnvironment extends Mesh<BufferGeometry, EnvironmentMaterial> {
 
 	public var roughness(get, set): Float;
 	public var multiplier(get, set): Float;
@@ -26,7 +26,7 @@ class Background extends Mesh<BufferGeometry, EnvironmentMaterial> {
 		geometry.deleteAttribute('normal');
 		geometry.deleteAttribute('uv');
 		
-		this.name = 'Background';
+		this.name = 'BackgroundEnvironment';
 		this.frustumCulled = false;
 		this.castShadow = false;
 		this.receiveShadow = false;

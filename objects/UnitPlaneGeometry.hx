@@ -8,6 +8,6 @@ class UnitPlaneGeometry extends three.PlaneGeometry {
 		super(1, 1, 1, 1);
 	}
 
-	static public final globalGeom = new UnitPlaneGeometry();
+	static public final instance = new UnitPlaneGeometry();
 
 }
