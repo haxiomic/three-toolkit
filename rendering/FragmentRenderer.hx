@@ -30,7 +30,7 @@ class FragmentRenderer {
 	public function render(
 		target: Null<WebGLRenderTarget>,
 		material: Material,
-		?clearColor: Int,
+		?clearColor: three.ColorRepresentation,
 		?viewport: Vector4
 	) {
 		renderer.setRenderTarget(target);
@@ -43,6 +43,7 @@ class FragmentRenderer {
 		}
 
 		rttMesh.material = material;
+		rttMesh.visible = material != null;
 
 		if (clearColor != null) {
 			renderer.setClearColor(clearColor);
