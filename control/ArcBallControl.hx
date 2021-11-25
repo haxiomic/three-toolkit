@@ -56,6 +56,7 @@ class ArcBallControl {
 	// where angle is 0 at (x=0,z=1) and 90° at (x=1,z=0)
 	public final angleAroundY = new Spring(0.);
 	public final angleAroundXZ = new Spring(0.);
+	public final axialRotation = new Spring(0.);
 	public final radius = new Spring(1.);
 
 	public final target = new Vec3(0., 0., 0.);
@@ -136,6 +137,7 @@ class ArcBallControl {
 	public inline function step(dt_s: Float) {
 		angleAroundY.step(dt_s);
 		angleAroundXZ.step(dt_s);
+		axialRotation.step(dt_s);
 		radius.step(dt_s);
 		
 		// spherical polar
@@ -144,9 +146,10 @@ class ArcBallControl {
 		position.y = radius.value * Math.sin(angleAroundXZ.value);
 
 		// look at (0, 0, 0)
+		var axial = Quat.fromAxisAngle(position.normalize(), axialRotation.value);
 		var aY = Quat.fromAxisAngle(new Vec3(0, 1, 0), angleAroundY.value);
 		var aXZ = Quat.fromAxisAngle(new Vec3(1, 0, 0), -angleAroundXZ.value);
-		orientation.copyFrom(aY * aXZ);
+		orientation.copyFrom(axial * (aY * aXZ));
 	}
 
 	public function applyToCamera(camera: {
