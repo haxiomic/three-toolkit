@@ -79,9 +79,15 @@ function extendAny<T>(base: T, extendWidth: Any): T {
 	return cast extended;
 }
 
+function copyFieldsAny(from: Any, to: Any) {
+	var fieldNames = Reflect.fields(from);
+	for (name in fieldNames) {
+		Reflect.setField(to, name, Reflect.field(from, name));
+	}
+}
+
 macro function copyFields(from: Expr, to: Expr) {
-	var fromType = Context.followWithAbstracts(Context.typeof(from));
-	var fieldNames = switch fromType {
+	var fieldNames = switch Context.followWithAbstracts(Context.typeof(from)) {
 		case TAnonymous(_.get() => anon): anon.fields.map(f -> f.name);
 		case TInst(_.get() => classType, _): classType.fields.get().map(f -> f.name);
 		default:
@@ -96,6 +102,28 @@ macro function copyFields(from: Expr, to: Expr) {
 		var from = $from;
 		var to = $to;
 		$b{exprs};
+	}
+}
+
+macro function duplicate(structure: Expr) {
+	var fieldNames = switch Context.followWithAbstracts(Context.typeof(structure)) {
+		case TAnonymous(_.get() => anon): anon.fields.map(f -> f.name);
+		default:
+			Context.fatalError('Can only duplicate structures', Context.currentPos());
+	}
+	
+	var objExpr = {
+		expr: EObjectDecl([
+			for (name in fieldNames) {
+				field: name,
+				expr: macro obj.$name
+			}
+		]),
+		pos: Context.currentPos(),
+	};
+	return macro {
+		var obj = $structure;
+		$objExpr;
 	}
 }
 
