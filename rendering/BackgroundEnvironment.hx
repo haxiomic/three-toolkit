@@ -1,5 +1,6 @@
 package rendering;
 
+import three.Color;
 import three.BufferGeometry;
 import three.Uniform;
 import three.ShaderMaterial;
@@ -18,10 +19,11 @@ import three.Group;
 class BackgroundEnvironment extends Mesh<BufferGeometry, EnvironmentMaterial> {
 
 	public var roughness(get, set): Float;
-	public var multiplier(get, set): Float;
+	public var multiplier(get, set): Color;
 
 	public function new(roughness: Float = 0.5) {
-		super(new three.BoxGeometry(1, 1, 1), new EnvironmentMaterial(roughness));
+		var environmentMaterial = new EnvironmentMaterial(roughness);
+		super(new three.BoxGeometry(1, 1, 1), environmentMaterial);
 
 		geometry.deleteAttribute('normal');
 		geometry.deleteAttribute('uv');
@@ -49,7 +51,7 @@ class BackgroundEnvironment extends Mesh<BufferGeometry, EnvironmentMaterial> {
 	inline function get_multiplier() {
 		return this.material.uMultiplier.value;
 	}
-	inline function set_multiplier(v: Float) {
+	inline function set_multiplier(v: Color) {
 		return this.material.uMultiplier.value = v;
 	}
 
@@ -60,7 +62,7 @@ class EnvironmentMaterial extends ShaderMaterial {
 	@:isVar public var envMap(get, set): Null<Texture>;
 	public final uRoughness: Uniform<Float>;
 	public final uFlipEnvMap: Uniform<Int>;
-	public final uMultiplier: Uniform<Float>;
+	public final uMultiplier: Uniform<Color>;
 
 	final uEnvMap: Uniform<Texture>;
 
@@ -68,7 +70,7 @@ class EnvironmentMaterial extends ShaderMaterial {
 		final uRoughness = new Uniform(0.5);
 		final uFlipEnvMap = new Uniform(-1);
 		final uEnvMap = new Uniform(null);
-		final uMultiplier = new Uniform(1.);
+		final uMultiplier = new Uniform(new Color(1,1,1));
 
 		super({
 			uniforms: {
@@ -81,12 +83,13 @@ class EnvironmentMaterial extends ShaderMaterial {
 			fragmentShader: 
 			'
 				uniform float uRoughness;
-				uniform float uMultiplier;
+				uniform vec3 uMultiplier;
 				#include <envmap_common_pars_fragment>
 				#ifdef USE_ENVMAP
 				varying vec3 vWorldDirection;
 				#endif
 				#include <cube_uv_reflection_fragment>
+
 				void main() {
 					#ifdef USE_ENVMAP
 						vec3 reflectVec = vWorldDirection;
@@ -116,6 +119,9 @@ class EnvironmentMaterial extends ShaderMaterial {
 					#else
 						gl_FragColor = vec4(1., 1., 1., 1.);
 					#endif
+
+					
+
 					gl_FragColor.rgb *= uMultiplier;
 					#include <tonemapping_fragment>
 					#include <encodings_fragment>
