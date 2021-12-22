@@ -4,6 +4,8 @@ package rendering;
 	Represents a three.Texture with a width and height field defined
 **/
 @:forward
+@:forward.new
+@:transitive
 abstract Texture(three.Texture) to three.Texture {
 
 	public var width(get, never): Float;

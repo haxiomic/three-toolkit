@@ -4,7 +4,7 @@ import three.WebGLRenderer;
 import three.Texture;
 import three.Uniform;
 import three.WebGLRenderTargetOptions;
-import three.WebGLRenderTarget;
+import rendering.WebGLRenderTarget;
 
 class DualRenderTarget {
 

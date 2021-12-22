@@ -16,6 +16,8 @@ typedef CustomPhysicalMaterialParameters = ShaderMaterialParameters & MeshPhysic
 
 class CustomPhysicalMaterial extends ShaderMaterial {
 
+	@:keep public var flatShading: Bool;
+
 	@:keep public var color: Color;
 	@:keep public var roughness: Float;
 	@:keep public var metalness: Float;
@@ -76,8 +78,15 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 	@:keep public var reflectivity (get, set): Float;
 
 	@:keep public var sheen (default, set): Null<Float>;
+	#if (three < "0.135.0")
 	@:keep public var sheenTint: Color;
+	#else
+	@:keep public var sheenColor: Color;
+	@:keep public var sheenColorMap: Texture;
+	#end
+
 	@:keep public var sheenRoughness: Float;
+	@:keep public var sheenRoughnessMap: Texture;
 
 	@:keep public var transparency: Float;
 
@@ -88,13 +97,26 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 	@:keep public var thickness: Float;
 	@:keep public var thicknessMap: Null<Texture>;
 	@:keep public var attenuationDistance: Float;
+	#if (three < "0.135.0")
 	@:keep public var attenuationTint: Color;
+	#else
+	@:keep public var attenuationColor: Color;
+	#end
 
 	@:keep public var specularIntensity : Float;
+	#if (three < "0.135.0")
 	@:keep public var specularTint : Color;
+	#else
+	@:keep public var specularColor : Color;
+	#end
 	@:keep public var specularIntensityMap : Null<Texture>;
+	#if (three < "0.135.0")
 	@:keep public var specularTintMap : Null<Texture>;
+	#else
+	@:keep public var specularColorMap : Null<Texture>;
+	#end
 
+	// @:keep public final isMaterial: Bool;
 	@:keep public final isMeshPhysicalMaterial: Bool;
 	@:keep public final isInitialized: Bool;
 
@@ -113,6 +135,7 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 			fog: true,
 		}, parameters != null ? parameters : {}));
 
+		this.flatShading = false;
 		this.color = new Color( 0xffffff ); // diffuse
 		this.roughness = 1.0;
 		this.metalness = 0.0;
@@ -152,8 +175,14 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 		this.clearcoatNormalMap = null;
 		// this.reflectivity = 0.5; // maps to F0 = 0.04
 		this.sheen = 0.0; // null will disable sheen bsdf
+		#if (three < "0.135.0")
 		this.sheenTint = new Color(0x0);
+		#else
+		this.sheenColor = new Color(0x0);
+		this.sheenColorMap = null;
+		#end
 		this.sheenRoughness = 1.0;
+		this.sheenRoughnessMap = null;
 		this.transparency = 0.0;
 		this.transmission = 0.;
 		this.ior = 1.5;
@@ -163,12 +192,25 @@ class CustomPhysicalMaterial extends ShaderMaterial {
 		this.thickness = 0.01;
 		this.thicknessMap = null;
 		this.attenuationDistance = 0.0;
+		#if (three < "0.135.0")
 		this.attenuationTint = new Color( 1, 1, 1 );
+		#else
+		this.attenuationColor = new Color( 1, 1, 1 );
+		#end
+
 
 		this.specularIntensity = 1.0;
+		#if (three < "0.135.0")
 		this.specularTint = new Color(1, 1, 1);
+		#else
+		this.specularColor = new Color(1, 1, 1);
+		#end
 		this.specularIntensityMap = null;
+		#if (three < "0.135.0")
 		this.specularTintMap = null;
+		#else
+		this.specularColorMap = null;
+		#end
 		
 		this.isMeshPhysicalMaterial = true;
 		this.isInitialized = true;

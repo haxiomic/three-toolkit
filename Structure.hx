@@ -1,5 +1,8 @@
+#if macro
+import haxe.macro.Type.ClassType;
 import haxe.macro.Context;
 import haxe.macro.Expr;
+#end
 
 /**
 	Extend a structure with another
@@ -79,13 +82,32 @@ function extendAny<T>(base: T, extendWidth: Any): T {
 	return cast extended;
 }
 
-macro function copyFields(from: Expr, to: Expr) {
-	var fromType = Context.followWithAbstracts(Context.typeof(from));
-	var fieldNames = switch fromType {
-		case TAnonymous(_.get() => anon): anon.fields.map(f -> f.name);
-		case TInst(_.get() => classType, _): classType.fields.get().map(f -> f.name);
+function copyFieldsAny(from: Any, to: Any) {
+	var fieldNames = Reflect.fields(from);
+	for (name in fieldNames) {
+		Reflect.setField(to, name, Reflect.field(from, name));
+	}
+}
+
+macro function copyFields(from: Expr, to: Expr, ?options: {exclude: Array<String>}) {
+	var fieldNames = switch Context.followWithAbstracts(Context.typeof(from)) {
+		case TAnonymous(_.get() => anon):
+			anon.fields.map(f -> f.name);
+		case TInst(_.get() => classType, _):
+			// filter accessible class variables and dynamic functions
+			getAllClassFields(classType)
+			.filter(f -> f.isPublic && switch f.kind {
+				case FMethod(MethDynamic): true;
+				case FVar(AccNormal | AccCall, _): true;
+				case FMethod(MethNormal | MethInline | MethMacro): false;
+				case FVar(_, _): false;
+			})
+			.map(f -> f.name);
 		default:
 			Context.fatalError('Can only copy from structures and classes', Context.currentPos());
+	}
+	if (options != null) {
+		fieldNames = fieldNames.filter(f -> !options.exclude.contains(f));
 	}
 	var exprs = [
 		for (name in fieldNames) {
@@ -98,6 +120,30 @@ macro function copyFields(from: Expr, to: Expr) {
 		$b{exprs};
 	}
 }
+
+macro function duplicate(structure: Expr) {
+	var fieldNames = switch Context.followWithAbstracts(Context.typeof(structure)) {
+		case TAnonymous(_.get() => anon): anon.fields.map(f -> f.name);
+		default:
+			Context.fatalError('Can only duplicate structures', Context.currentPos());
+	}
+	
+	var objExpr = {
+		expr: EObjectDecl([
+			for (name in fieldNames) {
+				field: name,
+				expr: macro obj.$name
+			}
+		]),
+		pos: Context.currentPos(),
+	};
+	return macro {
+		var obj = $structure;
+		$objExpr;
+	}
+}
+
+#if macro
 
 /**
 	Recursively unwraps Null<T> to T
@@ -115,3 +161,16 @@ private function unwrapNull(complexType: ComplexType) {
 			complexType;
 	}
 }
+
+/**
+ * Concatenates all fields including super types
+ * @param classType 
+ */
+private function getAllClassFields(classType: ClassType) {
+	var fields = if (classType.superClass != null) {
+		getAllClassFields(classType.superClass.t.get());
+	} else [];
+	return fields.concat(classType.fields.get());
+}
+
+#end

@@ -227,7 +227,7 @@ class FluidSimulation {
 		return _periodicBoundary = v;
 	}
 
-	static public final precision = 'mediump';
+	static public final precision = 'highp';
 	static final vertexShader = CompileTime.embedShader('./vertex-shader.glsl');
 	static public function getVertexShader(uv: Bool, finiteDifferences: Bool, simulationPosition: Bool) {
 		return '

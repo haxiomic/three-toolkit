@@ -113,6 +113,10 @@ class Spring {
 		if (onUpdate != null) onUpdate(value, velocity);
 	}
 
+	public function set(v: Float) {
+		forceCompletion(v);
+	}
+
 	public function forceCompletion(?v: Float) {
 		if (v != null) {
 			target = v;

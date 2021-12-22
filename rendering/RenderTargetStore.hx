@@ -60,6 +60,7 @@ class RenderTargetStore {
 			} else {
 				new WebGLRenderTarget(width, height, options);
 			}
+			Reflect.setField(target, 'name', uid);
 			this.map.set(uid, target);
 		} else {
 			// synchronize props
