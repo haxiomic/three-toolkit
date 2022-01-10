@@ -16,4 +16,4 @@ dts2hx three three/examples/jsm/loaders/RGBELoader three/examples/jsm/loaders/GL
 
 Some types rely on [VectorMath](https://github.com/haxiomic/vector-math), install with `haxelib install vector-math`
 
-See https://github.com/haxiomic/haxe-threejs-template for an example on usage
+See [haxiomic/haxe-threejs-template](https://github.com/haxiomic/haxe-threejs-template) for an example on usage
