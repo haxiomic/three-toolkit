@@ -68,37 +68,6 @@ class Animator {
 		?style: animator.Spring.SpringStyle,
 	}>): ExprOf<Spring>;
 
-	/*
-	function addTween(
-		easing: Easing,
-		object: Dynamic,
-		targets: DynamicAccess<Float>,
-		duration_s: Float,
-		?onComplete: (fieldName: String) -> Void,
-		?onUpdate: (fieldName: String, value: Float) -> Void
-	) {
-		for (fieldName in Reflect.fields(targets)) {
-			var existingAnimation = easingAnimations.find(item -> item.object == object && item.fieldName == fieldName);
-			if (existingAnimation != null) easingAnimations.remove(existingAnimation);
-			var x1 = targets.get(fieldName);
-			var x0 = Reflect.field(object, fieldName);
-			if (x1 != null && x0 != null) {
-				easingAnimations.push({
-					easeFn: getEasingFunction(easing),
-					object: object,
-					fieldName: fieldName,
-					duration_s: duration_s,
-					x0: (x0: Float),
-					x1: (x1: Float),
-					t0: t_s,
-					onComplete: onComplete,
-					onUpdate: onUpdate,
-				});
-			}
-		}
-	}
-	*/
-
 	/**
 	 * Add permanent spring that will not be removed when the target is reached
 	 * @param spring 
@@ -179,9 +148,9 @@ class Animator {
 					options.style,
 					0.,
 					if (options.onUpdate == null) {
-						(__, ___) -> $fieldExpression = __;
+						(__: Float, ___) -> $fieldExpression = __;
 					} else {
-						(__, ___) -> {
+						(__: Float, ___) -> {
 							$fieldExpression = __;
 							options.onUpdate(__);
 						}
