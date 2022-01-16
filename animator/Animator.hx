@@ -1,58 +1,45 @@
 package animator;
 
-import haxe.DynamicAccess;
-import animator.Easing.EasingFunction;
+#if (!macro)
+import animator.Easing.EasingFunctions;
+import animator.Spring.SpringStyle;
 
 using Lambda;
-
-private typedef EasingAnimation = {
-	easeFn: EasingFunction,
-	object: Dynamic,
-	fieldName: String,
-	x0: Float,
-	x1: Float,
-	t0: Float,
-	duration_s: Float,
-	?onComplete: (fieldName: String) -> Void,
-	?onUpdate: (fieldName: String, value: Float) -> Void,
-}
 
 @:nullSafety
 class Animator {
 
-	public final easingAnimations = new haxe.ds.List<EasingAnimation>();
+	public final temporaryTweens = new Array<Tween>();
+	public final temporarySprings = new Array<Spring>();
 	public final springs = new Array<Spring>();
 	var t_s = 0.0;
-	var postStepCallbacks = new haxe.ds.List<(t_s: Float, dt_s: Float) -> Void>();
+	var preStepCallbacks = new Array<(t_s: Float, dt_s: Float) -> Void>();
+	var postStepCallbacks = new Array<(t_s: Float, dt_s: Float) -> Void>();
 
 	public function new() {}
-
-	public function addPostStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
-		if (!postStepCallbacks.has(callback)) {
-			postStepCallbacks.push(callback);
-		}
-	}
-
-	public function removePostStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
-		postStepCallbacks.remove(callback);
-	}
 
 	public function step(dt_s: Float) {
 		t_s += dt_s;
 
-		for (e in easingAnimations) {
-			var t = t_s - e.t0;
-			var complete = t >= e.duration_s;
-			var v = complete ? e.x1 : e.easeFn(e.x0, e.x1, e.duration_s, t);
-			Reflect.setField(e.object, e.fieldName, v);
-			if (e.onUpdate != null) {
-				e.onUpdate(e.fieldName, v);
+		for (cb in postStepCallbacks) {
+			cb(t_s, dt_s);
+		}
+
+		for (tween in temporaryTweens) {
+			if (!tween.isComplete()) {
+				tween.step(dt_s);
 			}
-			if (complete) {
-				if (e.onComplete != null) {
-					e.onComplete(e.fieldName);
-				}
-				easingAnimations.remove(e);
+			if (tween.isComplete()) {
+				temporaryTweens.remove(tween);
+			}
+		}
+
+		for (spring in temporarySprings) {
+			if (!spring.isComplete()) {
+				spring.step(dt_s);
+			}
+			if (spring.isComplete()) {
+				temporarySprings.remove(spring);
 			}
 		}
 
@@ -65,8 +52,25 @@ class Animator {
 		}
 	}
 
-	public function ease(
-		easingFn: EasingFunction,
+	public macro function tweenTo(self: Expr, fieldExpression: ExprOf<Float>, toValue: ExprOf<Float>, ?options: ExprOf<{
+		?duration_s: Float,
+		?onUpdate: (value: Float) -> Void,
+		?onComplete: () -> Void,
+		?easing: Easing,
+	}>): ExprOf<Void>; // implementation below in macro code
+
+	/**
+	 * Animate value with a spring, the spring is removed when the value is reached (if ever)
+	 */
+	public macro function springTo(self: Expr, fieldExpression: ExprOf<Float>, toValue: ExprOf<Float>, options: ExprOf<{
+		?onUpdate: (value: Float) -> Void,
+		?onComplete: () -> Void,
+		?style: animator.Spring.SpringStyle,
+	}>): ExprOf<Spring>;
+
+	/*
+	function addTween(
+		easing: Easing,
 		object: Dynamic,
 		targets: DynamicAccess<Float>,
 		duration_s: Float,
@@ -80,7 +84,7 @@ class Animator {
 			var x0 = Reflect.field(object, fieldName);
 			if (x1 != null && x0 != null) {
 				easingAnimations.push({
-					easeFn: easingFn,
+					easeFn: getEasingFunction(easing),
 					object: object,
 					fieldName: fieldName,
 					duration_s: duration_s,
@@ -93,7 +97,12 @@ class Animator {
 			}
 		}
 	}
+	*/
 
+	/**
+	 * Add permanent spring that will not be removed when the target is reached
+	 * @param spring 
+	 */
 	public function addSpring(spring: Spring) {
 		springs.push(spring);
 		return spring;
@@ -103,26 +112,86 @@ class Animator {
 		springs.remove(spring);
 	}
 
-	// easing
-	public inline function linear(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.linear, object, targets, duration_s, onComplete, onUpdate);
-	public inline function sineIn(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.sineIn, object, targets, duration_s, onComplete, onUpdate);
-	public inline function sineOut(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.sineOut, object, targets, duration_s, onComplete, onUpdate);
-	public inline function sineInOut(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.sineInOut, object, targets, duration_s, onComplete, onUpdate);
-	public inline function quadIn(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.quadIn, object, targets, duration_s, onComplete, onUpdate);
-	public inline function quadOut(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.quadOut, object, targets, duration_s, onComplete, onUpdate);
-	public inline function quadInOut(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.quadInOut, object, targets, duration_s, onComplete, onUpdate);
-	public inline function cubicIn(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.cubicIn, object, targets, duration_s, onComplete, onUpdate);
-	public inline function cubicOut(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.cubicOut, object, targets, duration_s, onComplete, onUpdate);
-	public inline function cubicInOut(object: Dynamic, targets: DynamicAccess<Float>, duration_s: Float, ?onComplete: (fieldName: String) -> Void, ?onUpdate: (fieldName: String, value: Float) -> Void)
-		ease(Easing.cubicInOut, object, targets, duration_s, onComplete, onUpdate);
+	public function addPreStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
+		if (!preStepCallbacks.has(callback)) {
+			preStepCallbacks.push(callback);
+		}
+		return {remove: () -> preStepCallbacks.remove(callback)};
+	}
+
+	public function addPostStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
+		if (!postStepCallbacks.has(callback)) {
+			postStepCallbacks.push(callback);
+		}
+		return {remove: () -> postStepCallbacks.remove(callback)};
+	}
 
 }
+
+#else // if macro
+
+import haxe.macro.Expr;
+
+class Animator {
+
+	public macro function tweenTo(self: Expr, fieldExpression: ExprOf<Float>, toValue: ExprOf<Float>, options: Expr): ExprOf<Void> {
+		return macro @:privateAccess {
+			var options: {
+				?duration_s: Float,
+				?onUpdate: (value: Float) -> Void,
+				?onComplete: () -> Void,
+				?easing: animator.Easing,
+			} = $options;
+
+			var startValue: Float = $fieldExpression;
+			var toValue: Float = $toValue;
+
+			$self.temporaryTweens.push(
+				new animator.Tween(
+					options.easing,
+					(__: Float) -> $fieldExpression = __,
+					startValue,
+					toValue,
+					options.duration_s,
+					options.onUpdate,
+					options.onComplete
+				)
+			);
+
+		};
+	}
+
+	public macro function springTo(self: Expr, fieldExpression: ExprOf<Float>, toValue: ExprOf<Float>, options: Expr): ExprOf<Spring> {
+		return macro {
+			var options:{
+				?onUpdate: (value: Float) -> Void,
+				?onComplete: () -> Void,
+				?style: animator.Spring.SpringStyle,
+			} = $options;
+
+			var startValue: Float = $fieldExpression;
+			var toValue: Float = $toValue;
+
+			$self.temporarySprings.push(
+				new animator.Spring(
+					startValue,
+					toValue,
+					options.style,
+					0.,
+					if (options.onUpdate == null) {
+						(__, ___) -> $fieldExpression = __;
+					} else {
+						(__, ___) -> {
+							$fieldExpression = __;
+							options.onUpdate(__);
+						}
+					},
+					options.onComplete
+				)
+			);
+		};
+	}
+
+}
+
+#end
