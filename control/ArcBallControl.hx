@@ -2,7 +2,6 @@ package control;
 
 import Structure.extend;
 import animator.Spring;
-import app.EventResponse;
 import js.Browser;
 import js.html.Element;
 import js.html.MouseEvent;
@@ -66,7 +65,7 @@ class ArcBallControl {
 	public function new(
 		options: {
 			?interactionSurface: Element,
-			?interactionEventsManager: app.InteractionEventsManager,
+			?viewEvents: event.ViewEvents,
 			?angleAroundY: Float,
 			?angleAroundXZ: Float,
 			?radius: Float,
@@ -88,39 +87,49 @@ class ArcBallControl {
 		this.radius.forceCompletion(options.radius);
 
 		var interactionSurface = options.interactionSurface;
-		var interactionEventsManager = options.interactionEventsManager;
+		var viewEvents = options.viewEvents;
 
-		if (interactionEventsManager != null) {
+		if (viewEvents != null) {
 
-			interactionEventsManager.onPointerDown((e) -> handlePointerDown(new Vec2(e.x, e.y)));
-			interactionEventsManager.onPointerMove((e) -> {
-				handlePointerMove(new Vec2(e.x, e.y), new Vec2(e.viewWidth, e.viewHeight));
+			viewEvents.onPointerDown((e) -> {
+				if (handlePointerDown(new Vec2(e.x, e.y)) == PreventDefault) {
+					e.preventDefault();
+				}
 			});
-			interactionEventsManager.onPointerUp((e) -> handlePointerUp(new Vec2(e.x, e.y)));
-			interactionEventsManager.onWheel((e) -> {
+			viewEvents.onPointerMove((e) -> {
+				if (handlePointerMove(new Vec2(e.x, e.y), new Vec2(e.viewWidth, e.viewHeight)) == PreventDefault) {
+					e.preventDefault();
+				}
+			});
+			viewEvents.onPointerUp((e) -> {
+				if (handlePointerUp(new Vec2(e.x, e.y)) == PreventDefault) {
+					e.preventDefault();
+				}
+			});
+			viewEvents.onWheel((e) -> {
 				radius.target += e.deltaY * zoomSpeed / 1000;
 				radius.target = Math.max(radius.target, 0);
-				return PreventFurtherHandling;
+				e.preventDefault();
 			});
 			
 		} else if (interactionSurface != null) {
 			interactionSurface.addEventListener('mousedown', (e: MouseEvent) -> {
-				if (handlePointerDown(new Vec2(e.clientX, e.clientY)) == PreventFurtherHandling) {
+				if (handlePointerDown(new Vec2(e.clientX, e.clientY)) == PreventDefault) {
 					e.preventDefault();
 				}
 			});
 			interactionSurface.addEventListener('contextmenu', (e: MouseEvent) -> {
-				if (handlePointerUp(new Vec2(e.clientX, e.clientY)) == PreventFurtherHandling) {
+				if (handlePointerUp(new Vec2(e.clientX, e.clientY)) == PreventDefault) {
 					e.preventDefault();
 				}
 			});
 			Browser.window.addEventListener('mousemove', (e: MouseEvent) -> {
-				if (handlePointerMove(new Vec2(e.clientX, e.clientY), new Vec2(interactionSurface.clientWidth, interactionSurface.clientHeight)) == PreventFurtherHandling) {
+				if (handlePointerMove(new Vec2(e.clientX, e.clientY), new Vec2(interactionSurface.clientWidth, interactionSurface.clientHeight)) == PreventDefault) {
 					e.preventDefault();
 				}
 			});
 			Browser.window.addEventListener('mouseup', (e: MouseEvent) -> {
-				if (handlePointerUp(new Vec2(e.clientX, e.clientY)) == PreventFurtherHandling) {
+				if (handlePointerUp(new Vec2(e.clientX, e.clientY)) == PreventDefault) {
 					e.preventDefault();
 				}
 			});
@@ -176,7 +185,7 @@ class ArcBallControl {
 		_onDown_angleAroundY = angleAroundY.target;
 		_onDown_angleAroundXZ = angleAroundXZ.target;
 		_onDown_clientXY.copyFrom(clientXY);
-		return AllowFurtherHandling;
+		return Continue;
 	}
 
 	public inline function handlePointerMove(clientXY: Vec2, surfaceSize: Vec2): EventResponse {
@@ -197,15 +206,20 @@ class ArcBallControl {
 
 			angleAroundY.target = _onDown_angleAroundY - fadeMultiplier * flip * screenSpaceDelta.x * dragSpeed * aspect;
 
-			return PreventFurtherHandling;
+			return PreventDefault;
 		} else {
-			return AllowFurtherHandling;
+			return Continue;
 		}
 	}
 
 	public inline function handlePointerUp(clientXY: Vec2): EventResponse {
 		_isPointerDown = false;
-		return AllowFurtherHandling;
+		return Continue;
 	}
 
+}
+
+private enum abstract EventResponse(Int) {
+	final PreventDefault;
+	final Continue;
 }
