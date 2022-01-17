@@ -1,9 +1,6 @@
 package animator;
 
 #if (!macro)
-import animator.Easing.EasingFunctions;
-import animator.Spring.SpringStyle;
-
 using Lambda;
 
 @:nullSafety
