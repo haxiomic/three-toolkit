@@ -1,7 +1,7 @@
-package animator;
+package animation;
 
-import animator.Easing.EasingFunction;
-import animator.Easing.EasingFunctions;
+import animation.Easing.EasingFunction;
+import animation.Easing.EasingFunctions;
 
 class Tween {
 

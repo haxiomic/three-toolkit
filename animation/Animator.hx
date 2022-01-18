@@ -1,4 +1,4 @@
-package animator;
+package animation;
 
 #if (!macro)
 using Lambda;
@@ -62,7 +62,7 @@ class Animator {
 	public macro function springTo(self: Expr, fieldExpression: ExprOf<Float>, toValue: ExprOf<Float>, options: ExprOf<{
 		?onUpdate: (value: Float) -> Void,
 		?onComplete: () -> Void,
-		?style: animator.Spring.SpringStyle,
+		?style: animation.Spring.SpringStyle,
 	}>): ExprOf<Spring>;
 
 	/**
@@ -106,14 +106,14 @@ class Animator {
 				?duration_s: Float,
 				?onUpdate: (value: Float) -> Void,
 				?onComplete: () -> Void,
-				?easing: animator.Easing,
+				?easing: animation.Easing,
 			} = $options;
 
 			var startValue: Float = $fieldExpression;
 			var toValue: Float = $toValue;
 
 			$self.temporaryTweens.push(
-				new animator.Tween(
+				new animation.Tween(
 					options.easing,
 					(__: Float) -> $fieldExpression = __,
 					startValue,
@@ -132,14 +132,14 @@ class Animator {
 			var options:{
 				?onUpdate: (value: Float) -> Void,
 				?onComplete: () -> Void,
-				?style: animator.Spring.SpringStyle,
+				?style: animation.Spring.SpringStyle,
 			} = $options;
 
 			var startValue: Float = $fieldExpression;
 			var toValue: Float = $toValue;
 
 			$self.temporarySprings.push(
-				new animator.Spring(
+				new animation.Spring(
 					startValue,
 					toValue,
 					options.style,

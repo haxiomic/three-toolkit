@@ -1,7 +1,7 @@
 package control;
 
 import Structure.extend;
-import animator.Spring;
+import animation.Spring;
 import js.Browser;
 import js.html.Element;
 import js.html.MouseEvent;

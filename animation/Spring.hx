@@ -1,4 +1,4 @@
-package animator;
+package animation;
 
 import Math.*;
 
