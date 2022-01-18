@@ -143,7 +143,7 @@ class ArcBallControl {
 		}
 	}
 
-	public inline function step(dt_s: Float) {
+	inline function step(dt_s: Float) {
 		angleAroundY.step(dt_s);
 		angleAroundXZ.step(dt_s);
 		axialRotation.step(dt_s);
@@ -161,7 +161,7 @@ class ArcBallControl {
 		orientation.copyFrom(axial * (aY * aXZ));
 	}
 
-	public function applyToCamera(camera: {
+	inline function applyToCamera(camera: {
 		final position: {x: Float, y: Float, z: Float};
 		final quaternion: {x: Float, y: Float, z: Float, w: Float};
 	}) {
@@ -174,6 +174,14 @@ class ArcBallControl {
 		camera.quaternion.y = q.y;
 		camera.quaternion.z = q.z;
 		camera.quaternion.w = q.w;
+	}
+
+	public inline function update(camera: {
+		final position: {x: Float, y: Float, z: Float};
+		final quaternion: {x: Float, y: Float, z: Float, w: Float};
+	}, dt_s: Float) {
+		step(dt_s);
+		applyToCamera(camera);
 	}
 
 	var _onDown_angleAroundY: Float = 0;
