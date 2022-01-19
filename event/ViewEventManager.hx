@@ -19,13 +19,15 @@ import js.html.WheelEvent;
 	- KeyboardEvents mirror browser [KeyboardEvent](https://w3c.github.io/uievents/#idl-keyboardevent) with an extra parameter `hasFocus` to detect if the view is focused for the event
 **/
 @:nullSafety
-class ViewEvents {
+class ViewEventManager {
 	
 	public final el: Element;
+	// current pointer state
+	public final activePointers = new Map<Int, event.PointerState>();
+	public var activePointerCount(default, null) = 0;
+
 	final eventHandler: EventDispatcher;
 
-	// current pointer state
-	final activePointers = new Map<Int, event.PointerState>();
 
 	public function new(el: Element) {
 		this.el = el;
@@ -308,6 +310,7 @@ class ViewEvents {
 				// copy state
 				Structure.copyFields(e, existingPointer, {exclude: ['pointerId', 'pointerType', 'isPrimary', 'button', 'preventDefault', 'defaultPrevented', 'nativeEvent']});
 			} else {
+				// add new state
 				activePointers.set(e.pointerId, {
 					buttons: e.buttons,
 					y: e.y,
@@ -325,6 +328,13 @@ class ViewEvents {
 					isPrimary: e.isPrimary,
 					height: e.height,
 				});
+				activePointerCount++;
+			}
+		}
+
+		function removePointerState(e: PointerEvent) {
+			if (activePointers.remove(e.pointerId)) {
+				activePointerCount--;
 			}
 		}
 
@@ -352,7 +362,7 @@ class ViewEvents {
 				case MOUSE:
 					updatePointerState(e);
 				case PEN, TOUCH:
-					activePointers.remove(e.pointerId);
+					removePointerState(e);
 			}
 
 			eventHandler.onPointerUp(e);
@@ -365,7 +375,7 @@ class ViewEvents {
 				case MOUSE:
 					updatePointerState(e);
 				case PEN, TOUCH:
-					activePointers.remove(e.pointerId);
+					removePointerState(e);
 			}
 
 			eventHandler.onPointerCancel(e);

@@ -65,7 +65,7 @@ class ArcBallControl {
 	public function new(
 		options: {
 			?interactionSurface: Element,
-			?viewEvents: event.ViewEvents,
+			?viewEventManager: event.ViewEventManager,
 			?angleAroundY: Float,
 			?angleAroundXZ: Float,
 			?radius: Float,
@@ -87,26 +87,26 @@ class ArcBallControl {
 		this.radius.forceCompletion(options.radius);
 
 		var interactionSurface = options.interactionSurface;
-		var viewEvents = options.viewEvents;
+		var viewEventManager = options.viewEventManager;
 
-		if (viewEvents != null) {
+		if (viewEventManager != null) {
 
-			viewEvents.onPointerDown((e) -> {
+			viewEventManager.onPointerDown((e) -> {
 				if (handlePointerDown(new Vec2(e.x, e.y)) == PreventDefault) {
 					e.preventDefault();
 				}
 			});
-			viewEvents.onPointerMove((e) -> {
+			viewEventManager.onPointerMove((e) -> {
 				if (handlePointerMove(new Vec2(e.x, e.y), new Vec2(e.viewWidth, e.viewHeight)) == PreventDefault) {
 					e.preventDefault();
 				}
 			});
-			viewEvents.onPointerUp((e) -> {
+			viewEventManager.onPointerUp((e) -> {
 				if (handlePointerUp(new Vec2(e.x, e.y)) == PreventDefault) {
 					e.preventDefault();
 				}
 			});
-			viewEvents.onWheel((e) -> {
+			viewEventManager.onWheel((e) -> {
 				radius.target += e.deltaY * zoomSpeed / 1000;
 				radius.target = Math.max(radius.target, 0);
 				e.preventDefault();
