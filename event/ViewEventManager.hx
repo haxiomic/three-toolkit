@@ -461,6 +461,8 @@ class ViewEventManager {
 			eventHandler.onWheel({
 				x: x_px - bounds.left,
 				y: y_px - bounds.top,
+				viewWidth: bounds.width,
+				viewHeight: bounds.height,
 				deltaX: deltaX_px,
 				deltaY: deltaY_px,
 				deltaZ: deltaZ_px,
