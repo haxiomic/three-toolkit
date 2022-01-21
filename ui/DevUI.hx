@@ -45,6 +45,7 @@ class DevUI extends ExposedGUI {
 	public macro function addMaterial(material: ExprOf<Material>): ExprOf<GUIController> { }
 	public macro function addColor(color: ExprOf<three.Color>): ExprOf<GUIController> { }
 	public macro function addDropdown<T>(self: Expr, target:ExprOf<T>, ?values: ExprOf< EitherType<Array<T>, Map<String, T>> > ): ExprOf<GUIController> { }
+	public macro function addNumeric(self: Expr, numberExpr:ExprOf<Float>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> { }
 	public macro function add<T>(g: Expr, prop: ExprOf<T>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> {}
 
 	static function internalAddMaterial(g: DevUI, material: Material, ?fallbackName: String): DevUI {
@@ -265,6 +266,47 @@ class DevUI {
 		}
 	}
 
+	public macro function addNumeric(self: Expr, expr: ExprOf<Float>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> {
+		var name = expressionName(expr);
+
+		var type = Context.typeof(expr);
+
+		var ret = macro {
+			var o = {};
+			// use native javascript setter as a proxy
+			js.lib.Object.defineProperty(o, $v{name}, {
+				set: (__value) -> $expr = __value,
+				get: () -> $expr,
+			});
+			$self.internal.add(o, $v{name})
+				.name($v{name});
+		}
+
+		// numeric min/max
+		if (Context.unify(type, Context.getType('Float'))) { // is numeric
+			ret = macro {
+				var c = $ret;
+				var min = $min;
+				var max = $max;
+				if (min != null) {
+					c = c.min(min);
+				}
+				if (max != null) {
+					c = c.max(max);
+				}
+				c;
+			}
+
+			// step(1) if Int
+			var isInt = Context.unify(type, Context.getType('Int'));
+			if (isInt) {
+				ret = macro $ret.step(1);
+			}
+		}
+
+		return ret;
+	}
+
 	/**
 		Little utility to better integrate with more advanced properties.
 
@@ -277,16 +319,24 @@ class DevUI {
 		var name = expressionName(expr);
 
 		var type = Context.typeof(expr);
+		
+		// assume Float if type is unknown
+		var isMonomorph = switch type {
+			case TMono(t): true;
+			default: false;
+		}
+		if (isMonomorph) {
+			return macro $g.addNumeric($expr, $min, $max);
+		}
 
-		// unwrap Uniform<T>
-		if (Context.unify(type, Context.getType('three.Uniform'))) {
+		// unwrap Uniform<T> and Watchable<T>
+		if (Context.unify(type, Context.getType('three.Uniform')) || Context.unify(type, Context.getType('ds.Watchable'))) {
 			var typeParam = switch type {
 				case TInst(_, [t]): t;
-				default: Context.error('Expected Uniform<T>', Context.currentPos());
+				default: Context.error('Expected single type parameter', Context.currentPos());
 			}
 
 			expr = macro $expr.value;
-
 			type = typeParam;
 		}
 
@@ -299,41 +349,7 @@ class DevUI {
 		} else if (isEnumAbstract(type)) {
 			macro $g.addDropdown($expr);
 		} else {
-			var ret = macro {
-				var o = {};
-				// use native javascript setter as a proxy
-				js.lib.Object.defineProperty(o, $v{name}, {
-					set: (__value) -> $expr = __value,
-					get: () -> $expr,
-				});
-				$g.internal.add(o, $v{name})
-					.name($v{name});
-			}
-
-			// numeric min/max
-			if (Context.unify(type, Context.getType('Float'))) { // is numeric
-				ret = macro {
-					var c = $ret;
-					var min = $min;
-					var max = $max;
-					if (min != null) {
-						c = c.min(min);
-					}
-					if (max != null) {
-						c = c.max(max);
-					}
-					c;
-				}
-
-				// step(1) if Int
-				var isInt = Context.unify(type, Context.getType('Int'));
-				if (isInt) {
-					ret = macro $ret.step(1);
-				}
-			}
-			
-
-			ret;
+			macro $g.addNumeric($expr, $min, $max);
 		}
 	}
 
