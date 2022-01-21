@@ -1,5 +1,6 @@
 package ui;
 
+import haxe.macro.Printer;
 #if (!macro)
 import ui.dat_gui.GUIParams;
 import ui.dat_gui.GUIController;
@@ -37,7 +38,7 @@ class DevUI extends ExposedGUI {
 	inline function get_internal() return cast this;
 
 	public override function addFolder(name:String): DevUI {
-		return cast super.addFolder(name);
+		return patchFolder(cast super.addFolder(name));
 	}
 
 	// implementation provided below in macro section
@@ -47,6 +48,39 @@ class DevUI extends ExposedGUI {
 	public macro function addDropdown<T>(self: Expr, target:ExprOf<T>, ?values: ExprOf< EitherType<Array<T>, Map<String, T>> > ): ExprOf<GUIController> { }
 	public macro function addNumeric(self: Expr, numberExpr:ExprOf<Float>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> { }
 	public macro function add<T>(g: Expr, prop: ExprOf<T>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> {}
+
+	static function patchController(g: GUIController, getAssignSyntax: () -> Null<String>) {
+		var e = g.domElement.closest('li');
+		e.addEventListener('click', (e:js.html.MouseEvent) -> {
+			if (e.getModifierState('Alt')) {
+				e.preventDefault();
+				e.stopImmediatePropagation();
+			}
+		}, true);
+		untyped g.getAssignSyntax = getAssignSyntax;
+		return g;
+	}
+	
+	static function patchFolder(g: DevUI) {
+		var e = g.domElement.closest('li');
+		e.addEventListener('click', (e:js.html.MouseEvent) -> {
+			if (e.getModifierState('Alt')) {
+				var lines = [for (controller in g.internal.__controllers) {
+					if (untyped controller.getAssignSyntax != null) {
+						(untyped controller.getAssignSyntax(): String);
+					} else {
+						'// missing .getAssignSyntax() for ${controller.property}'; 
+					}
+				}];
+				lines.filter(line -> line != null);
+				
+				js.Browser.console.log('// ${g.name}\n' + lines.join('\n'));
+				e.preventDefault();
+				e.stopImmediatePropagation();
+			}
+		}, true);
+		return g;
+	}
 
 	static function internalAddMaterial(g: DevUI, material: Material, ?fallbackName: String): DevUI {
 		var name = if (material.name == null || material.name == "") {
@@ -202,7 +236,7 @@ class DevUI {
 				Context.error("Could not determine dropdown options", target.pos);
 		}
 
-		return macro {
+		return macro @:privateAccess {
 			var options = $options;
 			var names = ${namesValues.names};
 			var values = ${namesValues.values};
@@ -228,8 +262,10 @@ class DevUI {
 					}, 
 					get: () -> $target,
 				});
-				g.internal.add(o, $v{name}, obj)
-					.name($v{name});
+				ui.DevUI.patchController(
+					g.internal.add(o, $v{name}, obj).name($v{name}),
+					() -> $v{new Printer().printExpr(target) + ' = '} + names[values.indexOf($target)] + ';'
+				);
 			}
 		}
 	}
@@ -237,32 +273,40 @@ class DevUI {
 	public macro function addColor(self: Expr, color: ExprOf<three.Color>) {
 		var name = expressionName(color);
 
-		return macro {
+		return macro @:privateAccess {
 			var g = $self;
 			var color: three.Color = $color;
 			if (color == null) {
 				color = new three.Color();
 				$color = color;
 			}
-			g.internal.addColor({c: color.getHex()}, 'c')
-			.name($v{name})
-			.onChange((hex) -> {
-				color.setHex(hex);
-			});
+			ui.DevUI.patchController(
+				g.internal.addColor({c: color.getHex()}, 'c')
+				.name($v{name})
+				.onChange((hex) -> {
+					color.setHex(hex);
+				}),
+				() -> $v{new Printer().printExpr(color)}+'.setHex(0x' + color.getHexString() + ');'
+			);
 		}
 	}
 
 	public macro function addFunction(self: Expr, fn: ExprOf<Function>) {
 		var name = expressionName(fn);
-		return macro {
-			$self.internal.add({'fn': $fn}, 'fn').name($v{name});
+		return macro @:privateAccess {
+			ui.DevUI.patchController(
+				$self.internal.add({'fn': $fn}, 'fn').name($v{name}),
+				() -> $v{new Printer().printExpr(fn)} + ';'
+			);
 		};
 	}
 
 	public macro function addMaterial(self: Expr, material: ExprOf<Material>): ExprOf<GUIController> {
 		var fallbackName = expressionName(material);
-		return macro {
-			@:privateAccess ui.DevUI.internalAddMaterial($self, $material, $v{fallbackName});
+		return macro @:privateAccess {
+			ui.DevUI.patchFolder(
+				ui.DevUI.internalAddMaterial($self, $material, $v{fallbackName})
+			);
 		}
 	}
 
@@ -303,6 +347,11 @@ class DevUI {
 				ret = macro $ret.step(1);
 			}
 		}
+
+		ret = macro @:privateAccess ui.DevUI.patchController(
+			$ret,
+			() -> $v{new Printer().printExpr(expr)} + ' = ' + $expr + ';'
+		);
 
 		return ret;
 	}
