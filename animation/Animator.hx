@@ -18,7 +18,7 @@ class Animator {
 	public function step(dt_s: Float) {
 		t_s += dt_s;
 
-		for (cb in postStepCallbacks) {
+		for (cb in preStepCallbacks) {
 			cb(t_s, dt_s);
 		}
 
@@ -89,18 +89,26 @@ class Animator {
 		return addSpring(new Spring(initialValue, target, style, velocity, onUpdate, onComplete));
 	}
 
-	public function addPreStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
+	public function addBeforeStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
 		if (!preStepCallbacks.has(callback)) {
 			preStepCallbacks.push(callback);
 		}
 		return {remove: () -> preStepCallbacks.remove(callback)};
 	}
 
-	public function addPostStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
+	public function addAfterStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
 		if (!postStepCallbacks.has(callback)) {
 			postStepCallbacks.push(callback);
 		}
 		return {remove: () -> postStepCallbacks.remove(callback)};
+	}
+
+	public function removeBeforeStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
+		return preStepCallbacks.remove(callback);
+	}
+
+	public function removeAfterStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
+		return postStepCallbacks.remove(callback);
 	}
 
 }
