@@ -69,13 +69,24 @@ class Animator {
 	 * Add permanent spring that will not be removed when the target is reached
 	 * @param spring 
 	 */
-	public function addSpring(spring: Spring) {
+	public inline function addSpring(spring: Spring) {
 		springs.push(spring);
 		return spring;
 	}
 
-	public function removeSpring(spring: Spring) {
+	public inline function removeSpring(spring: Spring) {
 		springs.remove(spring);
+	}
+
+	public inline function createSpring(
+		initialValue: Float,
+		?target: Float,
+		?style: animation.Spring.SpringStyle,
+		velocity: Float = 0.0,
+		?onUpdate: (value: Float, velocity: Float) -> Void,
+		?onComplete: () -> Void
+	) {
+		return addSpring(new Spring(initialValue, target, style, velocity, onUpdate, onComplete));
 	}
 
 	public function addPreStepCallback(callback: (t_s: Float, dt_s: Float) -> Void) {
