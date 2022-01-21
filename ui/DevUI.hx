@@ -349,7 +349,7 @@ class DevUI {
 		} else if (isEnumAbstract(type)) {
 			macro $g.addDropdown($expr);
 		} else {
-			macro $g.addNumeric($expr, $min, $max);
+			macro $g.addNumeric($expr, $min, $max).name($v{name});
 		}
 	}
 
