@@ -49,6 +49,16 @@ class CompileTime {
 		return macro 'data:image/' + $v{mimeType} + ';base64,' + $v{Base64.encode(File.getBytes(resolvedPath))};
 	}
 
+	static public macro function embedJson(path:String) {
+		var resolvedPath =  resolvePath(path);
+		return try {
+			var json = haxe.Json.parse(sys.io.File.getContent(resolvedPath));
+			macro $v{json};
+		} catch (e) {
+			haxe.macro.Context.error('Failed to load json: $e', haxe.macro.Context.currentPos());
+		}
+	}
+
 	static public macro function getPathsInDirectory(directoryPath: String, ?matching: ExprOf<EReg>) {
 		var resolvedPath =  resolvePath(directoryPath);
 		var filenames = sys.FileSystem.readDirectory(resolvedPath);
