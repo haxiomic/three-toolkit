@@ -74,8 +74,18 @@ class Animator {
 		return spring;
 	}
 
+	/**
+	 * Add a temporary spring that will be removed when the target is reached
+	 * @param spring 
+	 */
+	public inline function addTemporarySpring(spring: Spring) {
+		temporarySprings.push(spring);
+		return spring;
+	}
+
 	public inline function removeSpring(spring: Spring) {
 		springs.remove(spring);
+		temporarySprings.remove(spring);
 	}
 
 	public inline function createSpring(
