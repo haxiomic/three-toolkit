@@ -138,7 +138,7 @@ class DevUI extends ExposedGUI {
 			g.add(m.clearcoatRoughness, 0, 1);
 			g.add(m.transmission, 0, 1);
 			g.add(m.ior, 0, 3);
-			g.add(m.thickness, 0, 3);
+			g.add(m.thickness, 0, 6);
 			#if (three < "0.135.0")
 			g.add(m.attenuationTint);
 			#else
