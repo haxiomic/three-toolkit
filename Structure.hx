@@ -104,7 +104,6 @@ macro function copyMatchingFields(from: Expr, to: Expr, ?options: {exclude: Arra
 			fieldNames.push(field);
 		}
 	}
-	trace(fieldNames);
 	if (options != null) {
 		fieldNames = fieldNames.filter(f -> !options.exclude.contains(f));
 	}
