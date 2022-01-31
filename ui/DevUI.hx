@@ -1,6 +1,5 @@
 package ui;
 
-import haxe.macro.Printer;
 #if (!macro)
 import ui.dat_gui.GUIParams;
 import ui.dat_gui.GUIController;
@@ -43,10 +42,11 @@ class DevUI extends ExposedGUI {
 
 	// implementation provided below in macro section
 	public macro function addFunction(fn: ExprOf<Function>): ExprOf<GUIController> { }
-	public macro function addMaterial(material: ExprOf<Material>): ExprOf<GUIController> { }
+	public macro function addMaterial(material: ExprOf<Material>): ExprOf<DevUI> { }
 	public macro function addColor(color: ExprOf<three.Color>): ExprOf<GUIController> { }
 	public macro function addDropdown<T>(self: Expr, target:ExprOf<T>, ?values: ExprOf< EitherType<Array<T>, Map<String, T>> > ): ExprOf<GUIController> { }
 	public macro function addNumeric(self: Expr, numberExpr:ExprOf<Float>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> { }
+	public macro function addObject(self: Expr, object:ExprOf<Any>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<DevUI> { }
 	public macro function add<T>(g: Expr, prop: ExprOf<T>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> {}
 
 	static function patchController(g: GUIController, getAssignSyntax: () -> Null<String>) {
@@ -199,6 +199,7 @@ extern class ExposedGUI {
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.ExprTools;
+import haxe.macro.Printer;
 
 class DevUI {
 
@@ -356,6 +357,36 @@ class DevUI {
 		return ret;
 	}
 
+	public macro function addObject(self: Expr, expr: ExprOf<Any>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUI> {
+		var fields = Structure.getPublicWritableFields(Context.typeof(expr), expr.pos);
+		var name = expressionName(expr);
+
+
+		var fieldAddExprs = [for (field in fields) {
+			var name = field.name;
+			var rangeMeta = Lambda.find(field.meta.get(), m -> {
+				var metaName = m.name.charAt(0) == ':' ? m.name.substr(1) : m.name;
+				metaName == 'range';
+			});
+			if (rangeMeta != null) {
+				var metaMin = rangeMeta.params[0];
+				var metaMax = rangeMeta.params[1];
+				macro g.add($expr.$name, $metaMin, $metaMax);
+			} else {
+				macro g.add($expr.$name, $min, $max);
+			}
+		}];
+		
+		var folder = macro {
+			var g = $self;
+			var name = $v{name};
+			var g = g.addFolder(name);
+			$b{fieldAddExprs}
+			g;
+		};
+		return macro @:privateAccess ui.DevUI.patchFolder($folder);
+	}
+
 	/**
 		Little utility to better integrate with more advanced properties.
 
@@ -365,8 +396,6 @@ class DevUI {
 		- haxe get/set
 	**/
 	public macro function add<T>(g: Expr, expr: ExprOf<T>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> {
-		var name = expressionName(expr);
-
 		var type = Context.typeof(expr);
 		
 		// assume Float if type is unknown
@@ -397,8 +426,11 @@ class DevUI {
 			macro $g.addMaterial($expr);
 		} else if (isEnumAbstract(type)) {
 			macro $g.addDropdown($expr);
-		} else {
+		} else if (Context.unify(type, Context.getType('Float')) || Context.unify(type, Context.getType('Bool'))) {
+			var name = expressionName(expr);
 			macro $g.addNumeric($expr, $min, $max).name($v{name});
+		} else {
+			macro $g.addObject($expr, $min, $max);
 		}
 	}
 

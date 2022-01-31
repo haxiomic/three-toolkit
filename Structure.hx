@@ -216,7 +216,7 @@ function getFields(type: haxe.macro.Type, pos: Position) {
 		case TInst(_.get() => classType, _):
 			getAllClassFields(classType);
 		case TAbstract(_.get() => abst, _):
-			abst.impl.get().fields.get();
+			abst.impl.get().statics.get();
 		case TMono(_) | TDynamic(_):
 			[];
 		case TLazy(f): getFields(f(), pos);
