@@ -40,6 +40,10 @@ class DevUI extends ExposedGUI {
 		return patchFolder(cast super.addFolder(name));
 	}
 
+	public function getFolder(name:String): Null<DevUI> {
+		return Reflect.field(internal.__folders, name);
+	}
+
 	// implementation provided below in macro section
 	public macro function addFunction(fn: ExprOf<Function>): ExprOf<GUIController> { }
 	public macro function addMaterial(material: ExprOf<Material>): ExprOf<DevUI> { }
@@ -192,6 +196,7 @@ extern class ExposedGUI {
 	var name: String;
 	function new(?option:GUIParams);
 	function addFolder(propName:String):ExposedGUI;
+	function removeFolder(folder: DevUI):Void;
 }
 
 #else // if macro
