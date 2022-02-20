@@ -366,7 +366,6 @@ class DevUI {
 		var fields = Structure.getPublicWritableFields(Context.typeof(expr), expr.pos);
 		var name = expressionName(expr);
 
-
 		var fieldAddExprs = [for (field in fields) {
 			var name = field.name;
 			var rangeMeta = Lambda.find(field.meta.get(), m -> {
@@ -401,6 +400,7 @@ class DevUI {
 		- haxe get/set
 	**/
 	public macro function add<T>(g: Expr, expr: ExprOf<T>, ?min: ExprOf<Float>, ?max: ExprOf<Float>): ExprOf<GUIController> {
+		var originalExpr = expr;
 		var type = Context.typeof(expr);
 		
 		// assume Float if type is unknown
@@ -432,7 +432,7 @@ class DevUI {
 		} else if (isEnumAbstract(type)) {
 			macro $g.addDropdown($expr);
 		} else if (Context.unify(type, Context.getType('Float')) || Context.unify(type, Context.getType('Bool'))) {
-			var name = expressionName(expr);
+			var name = expressionName(originalExpr);
 			macro $g.addNumeric($expr, $min, $max).name($v{name});
 		} else {
 			macro $g.addObject($expr, $min, $max);
