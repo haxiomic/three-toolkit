@@ -142,18 +142,19 @@ class Animator {
 			var startValue: Float = $fieldExpression;
 			var toValue: Float = $toValue;
 
-			$self.temporaryTweens.push(
-				new animation.Tween(
-					options.easing,
-					(__: Float) -> $fieldExpression = __,
-					startValue,
-					toValue,
-					options.duration_s,
-					options.onUpdate,
-					options.onComplete
-				)
+			var tween = new animation.Tween(
+				options.easing,
+				(__: Float) -> $fieldExpression = __,
+				startValue,
+				toValue,
+				options.duration_s,
+				options.onUpdate,
+				options.onComplete
 			);
 
+			$self.temporaryTweens.push(tween);
+
+			tween;
 		};
 	}
 
@@ -167,24 +168,24 @@ class Animator {
 
 			var startValue: Float = $fieldExpression;
 			var toValue: Float = $toValue;
-
-			$self.temporarySprings.push(
-				new animation.Spring(
-					startValue,
-					toValue,
-					options.style,
-					0.,
-					if (options.onUpdate == null) {
-						(__: Float, ___) -> $fieldExpression = __;
-					} else {
-						(__: Float, ___) -> {
-							$fieldExpression = __;
-							options.onUpdate(__);
-						}
-					},
-					options.onComplete
-				)
+			var spring = new animation.Spring(
+				startValue,
+				toValue,
+				options.style,
+				0.,
+				if (options.onUpdate == null) {
+					(__: Float, ___) -> $fieldExpression = __;
+				} else {
+					(__: Float, ___) -> {
+						$fieldExpression = __;
+						options.onUpdate(__);
+					}
+				},
+				options.onComplete
 			);
+
+			$self.temporarySprings.push(spring);
+			spring;
 		};
 	}
 

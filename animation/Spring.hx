@@ -43,6 +43,12 @@ class Spring {
 			case Critical(approxHalfLife_s):
 				this.damping = 3.356694 / approxHalfLife_s;
 				this.strength = this.damping * this.damping / 4;
+			case Underdamped(halfLife_s, springStrength):
+				this.damping = 2 * Math.log(2) / halfLife_s;
+				// 4k - b^2 > 0
+				var bSq = this.damping * this.damping;
+				this.strength = bSq + springStrength; 
+
 			case Custom(strength, damping):
 				this.damping = damping;
 				this.strength = strength;
@@ -171,6 +177,7 @@ enum SpringStyle {
 	 * `strength = damping * damping / 4`
 	 */
 	Critical(approxHalfLife_s: Float);
+	Underdamped(halfLife_s: Float, springStrength: Float);
 
 	Custom(strength: Float, damping: Float);
 
