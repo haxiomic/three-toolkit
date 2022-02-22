@@ -14,8 +14,8 @@ class Spring {
 	public var strength: Float;
 	public var damping: Float;
 	public var minEnergyThreshold = 1e-5;
-	final onUpdate: Null<(value: Float, velocity: Float) -> Void>;
-	final onComplete: Null<() -> Void>;
+	public var onUpdate: Null<(value: Float, velocity: Float) -> Void>;
+	public var onComplete: Null<() -> Void>;
 	
 	public function new(
 		initialValue: Float,
