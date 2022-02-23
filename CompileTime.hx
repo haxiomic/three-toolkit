@@ -92,6 +92,13 @@ class CompileTime {
 		return macro $v{paths};
 	}
 
+	static public macro function checkFile(path: String) {
+		if (!sys.FileSystem.exists(path)) {
+			Context.error('File not found "$path"', Context.currentPos());
+		}
+		return macro $v{path};
+	}
+
 	static public macro function haxeVersion() {
 		return macro $v{Context.definedValue('haxe')};
 	}
