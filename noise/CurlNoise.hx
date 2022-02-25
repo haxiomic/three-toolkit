@@ -14,14 +14,17 @@ package noise;
 import VectorMath;
 import noise.Snoise;
 
+private final dx = vec4(0);
+private final dy = vec4(0);
+private final dz = vec4(0);
+private final u2 = vec4(0.);
 inline function curlSnoisePotential(u: Vec4, outGx: Vec3, outGy: Vec3, outGz: Vec3) {
 	// generate 3 random values from p, t as a field vector
 	// along with analytic gradients
-	var dx = vec4(0), dy = vec4(0), dz = vec4(0);
 	var field = vec3(
 		snoise(u, dx),
-		snoise(u + vec4(38.231, -29.321, 12.314, -11.033), dy),
-		snoise(u + vec4(-238.231, -123.321, 130.314, -111.999), dz)
+		snoise(u2.copyFrom(u + vec4(38.231, -29.321, 12.314, -11.033)), dy),
+		snoise(u2.copyFrom(u + vec4(-238.231, -123.321, 130.314, -111.999)), dz)
 	);
 	outGx.copyFrom(dx.xyz);
 	outGy.copyFrom(dy.xyz);
@@ -44,9 +47,13 @@ inline function potentialGradients(u: Vec4, outGx: Vec3, outGy: Vec3, outGz: Vec
 	// see Bridson's curl noise paper for more details
 }
 
+private final gx = vec3(0.);
+private final gy = vec3(0.);
+private final gz = vec3(0.);
+private final pt = vec4(0.);
 function curlNoise(p: Vec3, t: Float): Vec3 {
-	var gx = vec3(0.), gy = vec3(0.), gz = vec3(0.);
-	potentialGradients(vec4(p, t), gx, gy, gz);
+	pt.copyFrom(vec4(p, t));
+	potentialGradients(pt, gx, gy, gz);
 	return vec3(
 		gz.y - gy.z,
 		gx.z - gz.x,
