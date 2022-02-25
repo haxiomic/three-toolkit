@@ -34,11 +34,10 @@ private inline function lessThan(a: Vec4, b: Vec4) {
 inline function grad4(j: Float, ip: Vec4) {
   final ones = vec4(1.0, 1.0, 1.0, -1.0);
   var p = vec4(0.);
-  var s = vec4(0.);
 
   p.xyz = floor( fract (vec3(j) * ip.xyz) * 7.0) * ip.z - 1.0;
   p.w = 1.5 - dot(abs(p.xyz), ones.xyz);
-  s = vec4(lessThan(p, vec4(0.0)));
+  var s = vec4(lessThan(p, vec4(0.0)));
   p.xyz = p.xyz + (s.xyz*2.0 - 1.0) * s.www; 
 
   return p;
@@ -89,7 +88,7 @@ function snoise(v: Vec4, outGradient: Vec4) {
 	var x4 = x0 + C.wwww;
 
 	// Permutations
-	i = mod(i, 289); 
+	var i = mod(i, 289); 
 	var j0 = permute( permute( permute( permute(i.w) + i.z) + i.y) + i.x);
 	var j1 = permute( permute( permute( permute (
 			  i.w + vec4(i1.w, i2.w, i3.w, 1.0 ))
