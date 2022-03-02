@@ -1,5 +1,6 @@
 package ui;
 
+import three.BlendingDstFactor;
 #if (!macro)
 import ui.dat_gui.GUIParams;
 import ui.dat_gui.GUIController;
@@ -133,6 +134,15 @@ class DevUI extends ExposedGUI {
 			g.add(m.side).onChange(_ -> m.needsUpdate = true);
 			g.add(m.envMapIntensity, 0, 4);
 			g.add(m.aoMapIntensity, 0, 4);
+			{
+				var g = g.addFolder('blending');
+				g.add(m.blending);
+				g.add(m.blendEquation);
+				g.add(m.blendDst);
+				// work around missing enum for blend src
+				var blendSrc: BlendingDstFactor = m.blendSrc;
+				g.add(blendSrc).onChange((v) -> m.blendSrc = v);
+			}
 		}
 
 		if (m is MeshPhysicalMaterial) {
