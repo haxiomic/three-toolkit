@@ -83,6 +83,12 @@ function extendAny<T>(base: T, extendWidth: Any): T {
 	return cast extended;
 }
 
+macro function getPublicFieldNames(expr: Expr) {
+	var type = Context.typeof(expr);
+	var fieldNames = getFields(type, expr.pos).filter(f -> f.isPublic).map(f -> f.name);
+	return macro $v{fieldNames};
+}
+
 /**
  * Copy fields from a structure or class to any other instance
  * 
