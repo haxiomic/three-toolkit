@@ -15,6 +15,8 @@ class ExponentialMovingAverage {
 	public function new(initialValue: Float, alpha: Float) {
 		this.alpha = alpha;
 		this.average = initialValue;
+		this.variance = 0.;
+		this.stdDev = 0.;
 		addSample(initialValue);
 	}
 

@@ -60,6 +60,9 @@ class PointerEvent extends PointerState {
 	final preventDefault: () -> Void;
 	final defaultPrevented: () -> Bool;
 	
+	/**
+	 *  milliseconds
+	 */
 	final timeStamp: Float;
 
 	/**
