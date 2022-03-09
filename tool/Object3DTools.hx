@@ -1,8 +1,10 @@
 package tool;
 
+import three.Matrix4;
 import three.BufferGeometry;
 import three.Material;
 import three.Mesh;
+import VectorMath;
 
 #if (three >= "0.133.0")
 private typedef Object3D = three.Object3D<three.Event>;
@@ -113,6 +115,18 @@ class Object3DTools {
 			replacements += replaceMaterial(child, searchMaterialName, replacement);
 		}
 		return replacements;
+	}
+
+	static var setRotationFromBasis_tmpMatrix4 = new Matrix4();
+	static public function setRotationFromBasis(obj: Object3D, basis: { x: Vec3, y: Vec3, z: Vec3 }) {
+		var rotationMatrix = mat4(
+			vec4(basis.x, 0.0),
+			vec4(basis.y, 0.0),
+			vec4(basis.z, 0.0),
+			vec4(0.0, 0.0, 0.0, 1.0)
+		);
+		rotationMatrix.copyIntoArray(setRotationFromBasis_tmpMatrix4.elements, 0);
+		obj.setRotationFromMatrix(setRotationFromBasis_tmpMatrix4);
 	}
 
 }
