@@ -51,20 +51,6 @@ class Scalar {
 		else 0.0;
 	}
 
-	static public inline function randomGaussian() {
-		return sqrt(-2 * log(random())) * cos(2 * PI * random());
-	}
-
-	static public inline function randomGaussian2D() {
-		// https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
-		var u1 = random();
-		var u2 = random();
-		return {
-			x: sqrt(-2 * log(u1)) * cos(2 * PI * u2),
-			y: sqrt(-2 * log(u2)) * cos(2 * PI * u1)
-		}
-	}
-
 	static public inline function cubicPulse(c: Float, w: Float, x: Float){
 		x = abs(x - c);
 		if( x>w ) return 0.0;
