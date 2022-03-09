@@ -118,7 +118,7 @@ class Object3DTools {
 	}
 
 	static var setRotationFromBasis_tmpMatrix4 = new Matrix4();
-	static public function setRotationFromBasis(obj: Object3D, basis: { x: Vec3, y: Vec3, z: Vec3 }) {
+	static public inline function setRotationFromBasis(obj: Object3D, basis: { x: Vec3, y: Vec3, z: Vec3 }) {
 		var rotationMatrix = mat4(
 			vec4(basis.x, 0.0),
 			vec4(basis.y, 0.0),
