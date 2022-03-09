@@ -84,24 +84,35 @@ class Object3DTools {
 	}
 
 	static public function getMaterialByName(obj: Object3D, name: String): Null<Material> {
-		if (obj is Mesh) {
-			var obj = (cast obj: Mesh<Any, three.Material>);
-			if (obj.material != null && obj.material.name == name) {
-				return obj.material;
+		if ((obj: Dynamic).material != null && (obj: Dynamic).material.name == name) {
+			return (obj: Dynamic).material;
+		}
+		for (child in obj.children) {
+			var m = getMaterialByName(child, name);
+			if (m != null) {
+				return m;
 			}
 		}
-		var material = null;
-		findDescendant(obj, (obj) -> {
-			if (obj is Mesh) {
-				var obj = (cast obj: Mesh<Any, three.Material>);
-				if (obj.material != null && obj.material.name == name) {
-					material = obj.material;
-					return true;
-				}
-			}
-			return false;
-		});
-		return material;
+		return null;
+	}
+
+	/**
+	 * Replaces materials with a given name recursively within an object
+	 * @param within 
+	 * @param searchMaterialName 
+	 * @param replacement 
+	 * @return number of replacements that occurred Int
+	 */
+	static public function replaceMaterial(obj: Object3D, searchMaterialName: String, replacement: Material): Int {
+		var replacements = 0;
+		if ((obj: Dynamic).material != null && (obj: Dynamic).material.name == searchMaterialName) {
+			(obj: Dynamic).material = replacement;
+			replacements += 1;
+		}
+		for (child in obj.children) {
+			replacements += replaceMaterial(child, searchMaterialName, replacement);
+		}
+		return replacements;
 	}
 
 }
