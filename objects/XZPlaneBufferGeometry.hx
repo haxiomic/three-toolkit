@@ -35,7 +35,7 @@ class XZPlaneBufferGeometry extends BufferGeometry {
 
 				var ui = i * 2;
 				uvs[ui + 0] = vertexColumn / widthSegments;
-				uvs[ui + 1] = vertexRow / widthSegments;
+				uvs[ui + 1] = vertexRow / heightSegments;
 			}
 		}
 
